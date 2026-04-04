@@ -452,7 +452,7 @@ export default function AgriShareHome() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.35, delay: 0.1, ease: "easeOut" }}
             >
-              <div className="flex-1 flex items-center px-4 pt-4 gap-3 w-full border-b md:border-b-0 md:border-r border-slate-100">
+              <div className="flex-1 flex items-center px-4 max-md:pt-4 gap-3 w-full border-b md:border-b-0 md:border-r border-slate-100">
                 <Search className="text-slate-400" size={20} />
                 <input
                   type="text"
