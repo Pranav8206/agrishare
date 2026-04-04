@@ -12,7 +12,7 @@ import {
   X,
   Languages,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
 const LANGUAGE_OPTIONS = [
@@ -49,33 +49,20 @@ export default function EquipmentInfoCard({
   const locationLabel = equipment?.location || "Location unavailable";
   const [isContactOpen, setIsContactOpen] = useState(false);
   const [activeLanguage, setActiveLanguage] = useState("en");
-  const [draftsByLanguage, setDraftsByLanguage] = useState({
-    en: "",
-    mr: "",
-    hi: "",
-  });
+  const [draftsByLanguage, setDraftsByLanguage] = useState({});
 
   const normalizedPhone = useMemo(
     () => normalizePhone(ownerPhone || equipment?.owner?.phone),
     [equipment?.owner?.phone, ownerPhone],
   );
 
-  const templates = useMemo(
-    () =>
-      buildMessageTemplates({
-        equipmentName: equipment?.name || "this equipment",
-        ownerName: ownerName || "owner",
-        locationLabel,
-      }),
-    [equipment?.name, locationLabel, ownerName],
-  );
+  const templates = buildMessageTemplates({
+    equipmentName: equipment?.name || "this equipment",
+    ownerName: ownerName || "owner",
+    locationLabel,
+  });
 
-  useEffect(() => {
-    setDraftsByLanguage(templates);
-    setActiveLanguage("en");
-  }, [templates]);
-
-  const currentDraft = draftsByLanguage[activeLanguage] || "";
+  const currentDraft = draftsByLanguage[activeLanguage] ?? templates[activeLanguage] ?? "";
   const currentLanguageLabel =
     LANGUAGE_OPTIONS.find((option) => option.value === activeLanguage)?.label ||
     "English";

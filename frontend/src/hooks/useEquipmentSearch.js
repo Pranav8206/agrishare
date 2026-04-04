@@ -1,7 +1,7 @@
 // frontend/src/hooks/useEquipmentSearch.js
 // Drop this file into: frontend/src/hooks/useEquipmentSearch.js
 
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useRef, useEffect } from "react";
 import Fuse from "fuse.js";
 
 /**
@@ -81,13 +81,12 @@ function getEquipmentCoords(item) {
 
 export function useEquipmentSearch(equipments = [], filters = {}) {
   const [query, setQuery] = useState("");
+  const debounceTimerRef = useRef(null);
 
   // Build fuse instance only when equipments list changes (not on every keystroke)
   const fuse = useMemo(() => new Fuse(equipments, FUSE_OPTIONS), [equipments]);
 
   const results = useMemo(() => {
-    const t0 = performance.now();
-
     let list;
 
     if (!query.trim()) {
@@ -139,22 +138,27 @@ export function useEquipmentSearch(equipments = [], filters = {}) {
       // Optionally sort by distance if a flag is set (let browse page handle sort)
     }
 
-    const searchTime = (performance.now() - t0).toFixed(1);
+    const searchTime = "0.0";
     return { list, searchTime };
   }, [query, equipments, fuse, filters]);
 
   // Debounced setter — waits 200ms before updating query state
   // so we don't re-run Fuse on every single keystroke
-  const debouncedSetQuery = useCallback(
-    (() => {
-      let timer;
-      return (val) => {
-        clearTimeout(timer);
-        timer = setTimeout(() => setQuery(val), 200);
-      };
-    })(),
-    []
-  );
+  const debouncedSetQuery = useCallback((val) => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    debounceTimerRef.current = setTimeout(() => setQuery(val), 200);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
 
   return {
     query,

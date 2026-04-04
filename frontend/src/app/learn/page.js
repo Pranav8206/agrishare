@@ -75,15 +75,7 @@ const cardGridVariants = {
 export default function LearnPage() {
     const { i18n } = useTranslation();
     const [activeVideo, setActiveVideo] = useState(null);
-    const [isHydrated, setIsHydrated] = useState(false);
-
-    useEffect(() => {
-        setIsHydrated(true);
-    }, []);
-
-    const lang = isHydrated
-        ? (i18n.resolvedLanguage || i18n.language || "en").split("-")[0]
-        : "en";
+    const lang = (i18n.resolvedLanguage || i18n.language || "en").split("-")[0];
 
     const activeLang = VIDEO_DATA[lang] ? lang : "en";
     const videos = VIDEO_DATA[activeLang];

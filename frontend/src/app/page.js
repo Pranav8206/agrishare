@@ -239,7 +239,10 @@ export default function AgriShareHome() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isListening, setIsListening] = useState(false);
-  const [speechSupported, setSpeechSupported] = useState(false);
+  const [speechSupported] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return Boolean(window.SpeechRecognition || window.webkitSpeechRecognition);
+  });
   const recognitionRef = useRef(null);
 
   const featuredEquipment = useMemo(() => {
@@ -249,15 +252,6 @@ export default function AgriShareHome() {
   }, [equipments]);
 
   const loadingFeatured = equipmentsLoading;
-
-  useEffect(() => {
-    const SpeechRecognition =
-      typeof window !== "undefined"
-        ? window.SpeechRecognition || window.webkitSpeechRecognition
-        : null;
-
-    setSpeechSupported(Boolean(SpeechRecognition));
-  }, []);
 
   useEffect(() => {
     return () => {

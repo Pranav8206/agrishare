@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Crown } from "lucide-react";
 
 export default function ImageGallery({
@@ -9,17 +9,14 @@ export default function ImageGallery({
   power,
   usageHours,
 }) {
-  const [selectedImage, setSelectedImage] = useState(imageList?.[0] || "");
+  const [selectedImage, setSelectedImage] = useState("");
 
-  useEffect(() => {
-    setSelectedImage(imageList?.[0] || "");
-  }, [imageList]);
-
-  const activeImage = selectedImage || imageList?.[0] || "";
+  const hasSelectedImage = imageList?.includes(selectedImage);
+  const activeImage = hasSelectedImage ? selectedImage : imageList?.[0] || "";
 
   return (
     <>
-      <div className="overflow-hidden rounded-2xl border border-[1px] border-gray-100 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
         <div className="relative">
           {isEquipmentOwner && (
             <div className="absolute left-4 top-4 z-10 inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700 shadow-sm">
@@ -64,7 +61,7 @@ export default function ImageGallery({
         </div>
       )}
 
-      <div className="rounded-2xl border border-[1px] border-gray-100 bg-white p-5 shadow-sm">
+      <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
         <h3 className="mb-4 font-semibold text-gray-900">Equipment Details</h3>
         <div className="space-y-3">
           <div>
