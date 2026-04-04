@@ -1,8 +1,8 @@
 import { useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
-import Icon from "@/Components/AddPage/Icon";
-import { icons } from "@/Components/AddPage/icons";
+import Icon from "@/components/AddPage/Icon";
+import { icons } from "@/components/AddPage/icons";
 
 export default function ImageUploader({
   images,

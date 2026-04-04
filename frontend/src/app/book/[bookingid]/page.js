@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import ProtectedRoute from "@/Components/ProtectedRoute";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAppContext } from "@/context/AppContext";
 import {
   ArrowLeft,

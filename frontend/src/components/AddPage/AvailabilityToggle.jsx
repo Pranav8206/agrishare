@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { FieldLabel } from "@/Components/AddPage/FormFields";
+import { FieldLabel } from "@/components/AddPage/FormFields";
 
 export default function AvailabilityToggle({ value, onChange }) {
   const { t } = useTranslation();

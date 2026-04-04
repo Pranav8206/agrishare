@@ -1,4 +1,4 @@
-import Icon from "@/Components/AddPage/Icon";
+import Icon from "@/components/AddPage/Icon";
 
 export default function SectionCard({ icon, title, subtitle, children }) {
   return (

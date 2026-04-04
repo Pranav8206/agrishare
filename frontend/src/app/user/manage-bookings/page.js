@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import ProtectedRoute from "@/Components/ProtectedRoute";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAppContext } from "@/context/AppContext";
 import { AlertCircle, Calendar, IndianRupee, User } from "lucide-react";
 import { useTranslation } from "react-i18next";

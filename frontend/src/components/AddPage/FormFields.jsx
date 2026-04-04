@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import Icon from "@/Components/AddPage/Icon";
+import Icon from "@/components/AddPage/Icon";
 
 function FieldLabel({ children, optional }) {
   const { t } = useTranslation();

@@ -11,7 +11,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { useState, useRef, useEffect } from "react";
 import { useAppContext } from "@/context/AppContext";
-import ProtectedRoute from "@/Components/ProtectedRoute";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 export default function UserLayout({ children }) {
   const router = useRouter();

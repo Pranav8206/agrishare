@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import ProtectedRoute from "@/Components/ProtectedRoute";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAppContext } from "@/context/AppContext";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";

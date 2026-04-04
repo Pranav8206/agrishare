@@ -15,13 +15,13 @@ import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { useAppContext } from "@/context/AppContext";
-import BookingModal from "@/Components/BookingModal";
-import BreadcrumbNav from "@/Components/equipmentdetail/BreadcrumbNav";
-import ImageGallery from "@/Components/equipmentdetail/ImageGallery";
-import AiAnalysisPanel from "@/Components/equipmentdetail/AiAnalysisPanel";
-import ReviewsSection from "@/Components/equipmentdetail/ReviewsSection";
-import EquipmentInfoCard from "@/Components/equipmentdetail/EquipmentInfoCard";
-import SimilarEquipmentSection from "@/Components/equipmentdetail/SimilarEquipmentSection";
+import BookingModal from "@/components/BookingModal";
+import BreadcrumbNav from "@/components/equipmentdetail/BreadcrumbNav";
+import ImageGallery from "@/components/equipmentdetail/ImageGallery";
+import AiAnalysisPanel from "@/components/equipmentdetail/AiAnalysisPanel";
+import ReviewsSection from "@/components/equipmentdetail/ReviewsSection";
+import EquipmentInfoCard from "@/components/equipmentdetail/EquipmentInfoCard";
+import SimilarEquipmentSection from "@/components/equipmentdetail/SimilarEquipmentSection";
 
 const renderRatingStars = (ratingValue = 0) => {
   const rounded = Math.round(Number(ratingValue) || 0);

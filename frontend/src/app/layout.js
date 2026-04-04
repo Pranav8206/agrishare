@@ -1,7 +1,7 @@
 "use client";
 import "./globals.css";
-import Navbar from "@/Components/Navbar";
-import Footer from "@/Components/Footer";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import { AppProvider } from "@/context/AppContext";
 import { Toaster } from "react-hot-toast";
 import "@/i18n";
