@@ -7,8 +7,11 @@ import { Toaster } from "react-hot-toast";
 import "@/i18n";
 import { useEffect } from "react";
 import i18n from "i18next";
+import { usePathname } from "next/navigation";
 
 export default function RootLayout({ children }) {
+  const pathname = usePathname();
+
   useEffect(() => {
     const supportedLanguages = new Set(["en", "hi", "mr"]);
 
@@ -41,6 +44,37 @@ export default function RootLayout({ children }) {
       i18n.off("languageChanged", applyLang);
     };
   }, []);
+
+  useEffect(() => {
+    const exactTitles = {
+      "/": "AgriShare | Empowering Farmers",
+      "/add": "List Equipment | AgriShare",
+      "/browse": "Browse Equipment | AgriShare",
+      "/fertilizers": "Fertilizers | AgriShare",
+      "/learn": "Learn | AgriShare",
+      "/login": "Login | AgriShare",
+      "/signup": "Create Account | AgriShare",
+      "/privacy-policy": "Privacy Policy | AgriShare",
+      "/terms-conditions": "Terms & Conditions | AgriShare",
+      "/user/dashboard": "Dashboard | AgriShare",
+      "/user/manage-bookings": "Manage Bookings | AgriShare",
+      "/user/manage-equipments": "Manage Equipment | AgriShare",
+      "/user/my-bookings": "My Bookings | AgriShare",
+      "/user/settings": "Settings | AgriShare",
+    };
+
+    const title =
+      exactTitles[pathname] ||
+      (pathname.startsWith("/equipment/")
+        ? "Equipment Details | AgriShare"
+        : pathname.startsWith("/book/")
+          ? "Booking Details | AgriShare"
+          : pathname.startsWith("/id/") || pathname.startsWith("/user/")
+            ? "User Profile | AgriShare"
+            : "AgriShare");
+
+    document.title = title;
+  }, [pathname]);
 
   return (
     <html lang="en">
