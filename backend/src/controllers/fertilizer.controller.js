@@ -128,3 +128,44 @@ export const listMyFertilizerOrders = asyncHandler(async (req, res) => {
     .sort({ createdAt: -1 });
   res.json({ orders });
 });
+
+export const listAdminFertilizerOrders = asyncHandler(async (_req, res) => {
+  const orders = await FertilizerOrder.find()
+    .populate("fertilizer", "name unit image")
+    .populate("buyer", "fullName email phone")
+    .sort({ createdAt: -1 });
+  res.json({ orders });
+});
+
+export const updateFertilizerOrderStatus = asyncHandler(async (req, res) => {
+  const { status } = req.body;
+  const allowedStatuses = [
+    "pending",
+    "confirmed",
+    "dispatched",
+    "delivered",
+    "cancelled",
+  ];
+  if (!allowedStatuses.includes(status)) {
+    throw createError("Invalid fertilizer order status", 400);
+  }
+
+  const order = await FertilizerOrder.findById(req.params.id);
+  if (!order) throw createError("Fertilizer order not found", 404);
+  if (order.status === "delivered" && status !== "delivered") {
+    throw createError("Delivered orders cannot be changed", 409);
+  }
+  if (order.status === "cancelled" && status !== "cancelled") {
+    throw createError("Cancelled orders cannot be reopened", 409);
+  }
+
+  if (status === "cancelled" && order.status !== "cancelled") {
+    await Fertilizer.findByIdAndUpdate(order.fertilizer, {
+      $inc: { quantity: order.quantity },
+    });
+  }
+
+  order.status = status;
+  await order.save();
+  res.json({ order });
+});

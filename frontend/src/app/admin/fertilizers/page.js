@@ -39,6 +39,7 @@ const toForm = (fertilizer) => ({
 export default function AdminFertilizersPage() {
   const { axiosInstance, user, authReady } = useAppContext();
   const [fertilizers, setFertilizers] = useState([]);
+  const [orders, setOrders] = useState([]);
   const [form, setForm] = useState(EMPTY_FORM);
   const [editingId, setEditingId] = useState("");
   const [search, setSearch] = useState("");
@@ -57,9 +58,21 @@ export default function AdminFertilizersPage() {
     }
   }, [axiosInstance]);
 
+  const loadOrders = useCallback(async () => {
+    try {
+      const { data } = await axiosInstance.get("/fertilizers/admin/orders");
+      setOrders(data?.orders || []);
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Unable to load fertilizer orders.");
+    }
+  }, [axiosInstance]);
+
   useEffect(() => {
-    if (authReady && user?.role === "admin") loadFertilizers();
-  }, [authReady, user?.role, loadFertilizers]);
+    if (authReady && user?.role === "admin") {
+      loadFertilizers();
+      loadOrders();
+    }
+  }, [authReady, user?.role, loadFertilizers, loadOrders]);
 
   const filtered = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -124,6 +137,18 @@ export default function AdminFertilizersPage() {
     }
   };
 
+  const updateOrderStatus = async (order, status) => {
+    try {
+      await axiosInstance.patch(`/fertilizers/admin/orders/${order._id}/status`, {
+        status,
+      });
+      toast.success(status === "confirmed" ? "Order accepted." : "Order rejected and stock restored.");
+      await Promise.all([loadOrders(), loadFertilizers()]);
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Unable to update order.");
+    }
+  };
+
   if (!authReady) {
     return <main className="grid min-h-screen place-items-center bg-slate-50"><Loader2 className="animate-spin text-emerald-600" /></main>;
   }
@@ -139,6 +164,7 @@ export default function AdminFertilizersPage() {
 
   const activeCount = fertilizers.filter((item) => item.isActive).length;
   const totalStock = fertilizers.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+  const pendingOrders = orders.filter((order) => order.status === "pending").length;
 
   return (
     <main className="min-h-screen bg-slate-50 px-4 pb-16 pt-24">
@@ -164,6 +190,64 @@ export default function AdminFertilizersPage() {
               <div><p className="text-xs font-bold uppercase tracking-wider text-slate-500">{label}</p><p className="mt-1 text-2xl font-black text-slate-900">{value}</p></div>
             </div>
           ))}
+        </section>
+
+        <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+          <div className="flex flex-col justify-between gap-3 border-b border-slate-100 p-5 md:flex-row md:items-center md:p-7">
+            <div>
+              <h2 className="text-xl font-black text-slate-900">Fertilizer orders</h2>
+              <p className="mt-1 text-sm text-slate-500">
+                Review COD requests and accept or reject pending orders.
+              </p>
+            </div>
+            <span className="w-fit rounded-full bg-amber-100 px-3 py-1.5 text-xs font-black text-amber-700">
+              {pendingOrders} pending approval
+            </span>
+          </div>
+          {orders.length === 0 ? (
+            <div className="p-10 text-center text-sm text-slate-500">No fertilizer orders received yet.</div>
+          ) : (
+            <div className="divide-y divide-slate-100">
+              {orders.map((order) => (
+                <div key={order._id} className="space-y-4 p-5 md:p-6">
+                  <div className="flex flex-col justify-between gap-3 md:flex-row md:items-start">
+                    <div>
+                      <p className="font-black text-slate-900">{order.orderNumber}</p>
+                      <p className="mt-1 text-sm font-bold text-emerald-700">
+                        {order.fertilizer?.name || "Deleted fertilizer"}
+                      </p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        {new Date(order.createdAt).toLocaleString()} · COD
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-lg font-black text-slate-900">₹{order.totalAmount}</span>
+                      <span className={`rounded-full px-3 py-1 text-xs font-black capitalize ${
+                        order.status === "pending"
+                          ? "bg-amber-100 text-amber-700"
+                          : order.status === "cancelled"
+                            ? "bg-red-100 text-red-700"
+                            : "bg-emerald-100 text-emerald-700"
+                      }`}>
+                        {order.status}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="grid gap-3 rounded-2xl bg-slate-50 p-4 text-sm text-slate-600 md:grid-cols-3">
+                    <p><strong className="text-slate-800">Customer:</strong> {order.farmerName}<br />{order.farmerPhone}</p>
+                    <p><strong className="text-slate-800">Quantity:</strong> {order.quantity} {order.fertilizer?.unit || "units"}<br />₹{order.unitPrice} per unit</p>
+                    <p><strong className="text-slate-800">Delivery address:</strong><br />{order.deliveryAddress}</p>
+                  </div>
+                  {order.status === "pending" ? (
+                    <div className="flex flex-wrap gap-3">
+                      <button type="button" onClick={() => updateOrderStatus(order, "confirmed")} className="rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-black text-white hover:bg-emerald-700">Accept order</button>
+                      <button type="button" onClick={() => updateOrderStatus(order, "cancelled")} className="rounded-xl border border-red-200 px-4 py-2.5 text-sm font-black text-red-700 hover:bg-red-50">Reject order</button>
+                    </div>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          )}
         </section>
 
         <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-7">
