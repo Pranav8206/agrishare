@@ -36,7 +36,6 @@ export const AppProvider = ({ children }) => {
   const [equipmentsLoading, setEquipmentsLoading] = useState(true);
   const [equipmentsError, setEquipmentsError] = useState(null);
   const [equipmentsFetchedAt, setEquipmentsFetchedAt] = useState(null);
-  const [activeTab, setActiveTab] = useState("equipment"); // "equipment" | "fertilizer"
 
   useEffect(() => {
     if (token) {
@@ -203,8 +202,6 @@ export const AppProvider = ({ children }) => {
       equipmentsError,
       equipmentsFetchedAt,
       refreshEquipments,
-      activeTab,
-      setActiveTab,
     }),
     [
       token,
@@ -216,8 +213,6 @@ export const AppProvider = ({ children }) => {
       equipmentsLoading,
       equipmentsError,
       equipmentsFetchedAt,
-      activeTab,
-      setActiveTab,
       setAuth,
       clearAuth,
       logout,

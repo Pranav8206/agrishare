@@ -21,7 +21,7 @@ const GENERIC_SEARCH_WORDS = new Set([
 
 const emptyFilters = () => ({
   location: "",
-  distance: 100,
+  distance: 1000,
   minPrice: "",
   maxPrice: "",
   types: new Set(),
@@ -447,7 +447,7 @@ function FilterSidebar({
         <input
           type="range"
           min="0"
-          max="100"
+          max="1000"
           value={filters.distance}
           onChange={(e) =>
             setFilters((current) => ({
@@ -460,7 +460,7 @@ function FilterSidebar({
         />
         <div className="mt-1 flex justify-between text-xs text-text-tertiary">
           <span>0 km</span>
-          <span>100 km</span>
+          <span>1000 km</span>
         </div>
       </div>
 
@@ -854,7 +854,7 @@ function BrowsePageContent() {
     Boolean(appliedFilters.location.trim()) ||
     Boolean(appliedFilters.minPrice) ||
     Boolean(appliedFilters.maxPrice) ||
-    appliedFilters.distance !== 100 ||
+    appliedFilters.distance !== 1000 ||
     appliedFilters.types.size > 0 ||
     appliedFilters.manufacturers.size > 0;
 
@@ -1153,4 +1153,3 @@ export default function BrowsePage() {
     </Suspense>
   );
 }
-

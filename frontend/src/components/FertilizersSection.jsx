@@ -33,7 +33,7 @@ import {
 import toast from "react-hot-toast";
 
 // ══════════════════ MOCK VERIFIED FERTILIZERS DATA ══════════════════
-const VERIFIED_FERTILIZERS = [
+export const VERIFIED_FERTILIZERS = [
   {
     id: "fert-1",
     name: "IFFCO Nano Urea (Liquid)",
@@ -45,8 +45,7 @@ const VERIFIED_FERTILIZERS = [
     unit: "500 ml Bottle (Equiv. to 1 Bag Urea)",
     rating: 4.9,
     reviewsCount: 142,
-    image:
-      "https://images.unsplash.com/photo-1585314062340-f1a5a7c9328d?auto=format&fit=crop&q=80&w=800",
+    image: "/fertilizers/fertilizer1.jpg",
     seller: {
       name: "Baramati Agro Farmer Producer Co.",
       type: "Govt. Registered FPO",
@@ -77,8 +76,7 @@ const VERIFIED_FERTILIZERS = [
     unit: "50 kg Bag",
     rating: 4.8,
     reviewsCount: 96,
-    image:
-      "https://images.unsplash.com/photo-1628352081506-83c43123ed6d?auto=format&fit=crop&q=80&w=800",
+    image: "/fertilizers/fertilizer2.jpg",
     seller: {
       name: "Sahyadri Farmers Producer Co. Ltd.",
       type: "Certified Organic Producer",
@@ -109,8 +107,7 @@ const VERIFIED_FERTILIZERS = [
     unit: "50 kg Bag",
     rating: 4.9,
     reviewsCount: 218,
-    image:
-      "https://images.unsplash.com/photo-1592417817098-8f3d6eb22543?auto=format&fit=crop&q=80&w=800",
+    image: "/fertilizers/fertilizer3.jpg",
     seller: {
       name: "Vidarbha Krishi Seva Kendra",
       type: "Authorized District Distributor",
@@ -141,8 +138,7 @@ const VERIFIED_FERTILIZERS = [
     unit: "40 kg Bag",
     rating: 5.0,
     reviewsCount: 74,
-    image:
-      "https://images.unsplash.com/photo-1574943320219-553eb213f72d?auto=format&fit=crop&q=80&w=800",
+    image: "/fertilizers/fertilizer4.jpg",
     seller: {
       name: "Raju Patil Farm Organics",
       type: "Verified Master Farmer & Vermi Specialist",
@@ -173,8 +169,7 @@ const VERIFIED_FERTILIZERS = [
     unit: "50 kg Bag (Govt. Regulated Rate)",
     rating: 4.7,
     reviewsCount: 185,
-    image:
-      "https://images.unsplash.com/photo-1530836369250-ef72a3f5cda8?auto=format&fit=crop&q=80&w=800",
+    image: "/fertilizers/fertilizer5.jpg",
     seller: {
       name: "Kisan Vikas Sahakari Society",
       type: "Primary Agricultural Credit Society (PACS)",
@@ -205,8 +200,7 @@ const VERIFIED_FERTILIZERS = [
     unit: "1 kg Pack (Foliar & Drip Grade)",
     rating: 4.9,
     reviewsCount: 58,
-    image:
-      "https://images.unsplash.com/photo-1587593810167-a84920ea0781?auto=format&fit=crop&q=80&w=800",
+    image: "/fertilizers/fertilizer6.jpg",
     seller: {
       name: "GreenAgri Research Labs",
       type: "KVK Certified Agri Producer",
@@ -237,8 +231,7 @@ const VERIFIED_FERTILIZERS = [
     unit: "45 kg Bag (Official Subsidized Rate)",
     rating: 4.8,
     reviewsCount: 340,
-    image:
-      "https://images.unsplash.com/photo-1595974482597-4b8da8879bc5?auto=format&fit=crop&q=80&w=800",
+    image: "/fertilizers/fertilizer7.jpg",
     seller: {
       name: "Solapur District Agri Cooperative",
       type: "District Marketing Federation",
@@ -269,8 +262,7 @@ const VERIFIED_FERTILIZERS = [
     unit: "1 Litre Bottle",
     rating: 4.9,
     reviewsCount: 112,
-    image:
-      "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&q=80&w=800",
+    image: "/fertilizers/fertilizer8.jpg",
     seller: {
       name: "AgroBio Solutions FPO",
       type: "Bio-Tech Farmer Cooperative",
@@ -544,73 +536,26 @@ export default function FertilizersSection() {
                 transition={{ duration: 0.25 }}
                 className="group flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xs transition hover:shadow-xl hover:border-emerald-300"
               >
-                {/* Top Image + Badges */}
                 <div className="relative h-48 w-full overflow-hidden bg-slate-100">
-                  <img
-                    src={fert.image}
-                    alt={fert.name}
-                    className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-
-                  {/* Top Left Verified Badge */}
-                  <div className="absolute left-3 top-3 flex items-center gap-1 rounded-full border border-emerald-400/40 bg-emerald-950/80 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-emerald-300 backdrop-blur-md">
-                    <ShieldCheck size={12} className="text-emerald-400" />
-                    {fert.seller.badge}
-                  </div>
-
-                  {/* Top Right Purity Score */}
-                  <div className="absolute right-3 top-3 rounded-full border border-white/20 bg-black/60 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-md">
-                    {fert.purityScore} Purity
-                  </div>
-
-                  {/* Bottom Image NPK Composition strip */}
-                  <div className="absolute bottom-2 left-3 right-3 flex items-center justify-between text-[11px] font-bold text-white">
-                    <span className="bg-white/20 px-2 py-0.5 rounded-md backdrop-blur-xs">
-                      N: {fert.npk.n} | P: {fert.npk.p} | K: {fert.npk.k}
-                    </span>
-                    <span className="flex items-center gap-1 text-amber-300">
-                      <Star size={12} className="fill-amber-300 text-amber-300" />
-                      {fert.rating}
-                    </span>
-                  </div>
+                <img
+                  src={fert.image}
+                  alt={fert.name}
+                  className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                 </div>
 
-                {/* Content Section */}
-                <div className="p-4 space-y-3 flex-1 flex flex-col justify-between">
-                  <div className="space-y-1.5">
-                    <p className="text-[11px] font-black uppercase tracking-wider text-emerald-700">
-                      {fert.brand}
+                <div className="flex flex-1 flex-col justify-between gap-3 p-4">
+                <div className="space-y-1.5">
+                  <p className="text-[11px] font-black uppercase tracking-wider text-emerald-700">
+                    {fert.brand}
                     </p>
                     <h3 className="text-base font-black text-slate-900 line-clamp-1 group-hover:text-emerald-700 transition">
                       {fert.name}
                     </h3>
-                    <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
-                      {fert.description}
-                    </p>
                   </div>
 
-                  {/* Verified Seller Info Card */}
-                  <div className="rounded-xl border border-slate-100 bg-slate-50 p-2.5 space-y-1 text-xs">
-                    <div className="flex items-center justify-between text-slate-800 font-bold">
-                      <span className="truncate flex items-center gap-1">
-                        <CheckCircle2 size={12} className="text-emerald-600 shrink-0" />
-                        {fert.seller.name}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-[11px] text-slate-500">
-                      <span className="flex items-center gap-1">
-                        <MapPin size={10} />
-                        {fert.seller.location}
-                      </span>
-                      <span className="font-semibold text-emerald-600">
-                        {fert.stockAvailable} in stock
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Price & Action Buttons */}
-                  <div className="pt-2 border-t border-slate-100">
+                  <div className="border-t border-slate-100 pt-3">
                     <div className="flex items-baseline justify-between mb-3">
                       <div>
                         <div className="flex items-center gap-1.5">
@@ -628,19 +573,8 @@ export default function FertilizersSection() {
                         </p>
                       </div>
 
-                      {/* View Lab Certificate Button */}
-                      <button
-                        type="button"
-                        onClick={() => setSelectedFertilizerForCert(fert)}
-                        className="inline-flex items-center gap-1 text-[11px] font-black text-emerald-700 hover:text-emerald-800 underline underline-offset-2"
-                        title="View Official Government Lab Report"
-                      >
-                        <FileCheck size={13} />
-                        Lab Report
-                      </button>
                     </div>
 
-                    {/* Order Now Button */}
                     <button
                       type="button"
                       onClick={() => handleOpenOrder(fert)}

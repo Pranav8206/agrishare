@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { useAppContext } from "../context/AppContext";
+import { VERIFIED_FERTILIZERS } from "../components/FertilizersSection";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -28,7 +29,6 @@ import {
   Users,
   Leaf,
 } from "lucide-react";
-import FertilizersSection from "../components/FertilizersSection";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 14 },
@@ -191,6 +191,43 @@ function FeaturedEquipmentCard({ equipmentId, title, price, location, img, ratin
   );
 }
 
+function FeaturedFertilizerCard({ fertilizer }) {
+  return (
+    <article className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
+      <div className="h-40 overflow-hidden bg-slate-100">
+        <img
+          src={fertilizer.image}
+          alt={fertilizer.name}
+          className="h-full w-full object-cover transition duration-500 hover:scale-105"
+        />
+      </div>
+      <div className="space-y-3 p-4">
+        <p className="text-[11px] font-black uppercase tracking-wider text-emerald-700">
+          {fertilizer.brand}
+        </p>
+        <h3 className="line-clamp-2 min-h-10 text-base font-black text-slate-900">
+          {fertilizer.name}
+        </h3>
+        <div className="flex items-end justify-between gap-3">
+          <div>
+            <p className="text-xl font-black text-slate-900">
+              ₹{fertilizer.price}
+            </p>
+            <p className="text-[10px] text-slate-500">{fertilizer.unit}</p>
+          </div>
+          <Link
+            href="/fertilizers"
+            className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-3 py-2 text-xs font-bold text-white transition hover:bg-emerald-700"
+          >
+            View
+            <ArrowUpRight size={13} />
+          </Link>
+        </div>
+      </div>
+    </article>
+  );
+}
+
 function FeaturedSkeleton() {
   return (
     <div className="overflow-hidden rounded-[1.85rem] border border-slate-200 bg-white shadow-sm">
@@ -237,7 +274,7 @@ function TestimonialCard({ quote, name, role }) {
 export default function AgriShareHome() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
-  const { equipments, equipmentsLoading, activeTab, setActiveTab } = useAppContext();
+  const { equipments, equipmentsLoading } = useAppContext();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isListening, setIsListening] = useState(false);
@@ -403,61 +440,7 @@ export default function AgriShareHome() {
 
   return (
     <div className="min-h-screen bg-background text-slate-900">
-      {/* ══════════ JIOHOTSTAR / TADKA STYLE DUAL BRAND TAB SWITCHER ══════════ */}
-      <section className="pt-20 md:pt-24 px-4 max-w-7xl mx-auto pb-2">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white/90 backdrop-blur-md p-2.5 rounded-3xl border border-slate-200 shadow-md">
-          {/* Main Dual Tab Switch (JioHotstar / Tadka Style) */}
-          <div className="flex items-center gap-1.5 p-1 bg-slate-100/90 rounded-2xl w-full sm:w-auto border border-slate-200">
-            <button
-              type="button"
-              onClick={() => setActiveTab("equipment")}
-              className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-xs sm:text-sm font-black transition-all duration-200 ${
-                activeTab === "equipment"
-                  ? "bg-emerald-700 text-white shadow-md shadow-emerald-700/25 scale-[1.02]"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              <Tractor size={18} className={activeTab === "equipment" ? "text-white" : "text-emerald-700"} />
-              <span>🚜 Equipment Sharing</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab("fertilizer")}
-              className={`flex-1 sm:flex-initial relative flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-xs sm:text-sm font-black transition-all duration-200 ${
-                activeTab === "fertilizer"
-                  ? "bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white shadow-md shadow-teal-600/25 scale-[1.02]"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              <Leaf size={18} className={activeTab === "fertilizer" ? "text-lime-300" : "text-emerald-700"} />
-              <span>🌱 Verified Fertilizers</span>
-              <span className="hidden md:inline-block rounded-full bg-amber-400 text-slate-950 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider animate-pulse">
-                Govt. Tested
-              </span>
-            </button>
-          </div>
-
-          {/* Quick Info Badge */}
-          <div className="hidden lg:flex items-center gap-2 text-xs font-bold text-slate-600 bg-slate-50 px-3.5 py-1.5 rounded-full border border-slate-200">
-            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
-            <span>
-              {activeTab === "equipment"
-                ? "🚜 45+ Machines Available for Rent Nearby"
-                : "🌱 100% Lab-Verified FPO Fertilizers"}
-            </span>
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════ TAB CONTENT ══════════ */}
-      {activeTab === "fertilizer" ? (
-        <section className="px-4 py-4 max-w-7xl mx-auto pb-20">
-          <FertilizersSection />
-        </section>
-      ) : (
-        <>
-          {/* --- HERO SECTION --- */}
+      {/* --- HERO SECTION --- */}
           <section className="px-4 py-4">
             <div className="relative max-w-7xl mx-auto h-125 rounded-[2.5rem] overflow-hidden group">
           {/* Background Image */}
@@ -639,6 +622,34 @@ export default function AgriShareHome() {
         viewport={{ once: true, amount: 0.2 }}
       >
         <SectionTitle
+          eyebrow="Verified fertilizers"
+          title="Featured fertilizers"
+          description="Shop tested products from our verified fertilizer catalog."
+          action={
+            <Link
+              href="/fertilizers"
+              className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white px-4 py-2 text-sm font-bold text-emerald-700 shadow-sm transition hover:border-emerald-300 hover:bg-emerald-50"
+            >
+              View all fertilizers
+              <ArrowUpRight size={16} />
+            </Link>
+          }
+        />
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {VERIFIED_FERTILIZERS.slice(0, 4).map((fertilizer) => (
+            <FeaturedFertilizerCard key={fertilizer.id} fertilizer={fertilizer} />
+          ))}
+        </div>
+      </motion.section>
+
+      <motion.section
+        className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8"
+        variants={staggerContainer}
+        initial="initial"
+        whileInView="whileInView"
+        viewport={{ once: true, amount: 0.2 }}
+      >
+        <SectionTitle
           eyebrow="How it works"
           title={t("home.howItWorks.title", { defaultValue: "A cleaner booking flow" })}
           description="The homepage should explain the process quickly, then get out of the way."
@@ -742,8 +753,6 @@ export default function AgriShareHome() {
           </div>
         </div>
       </motion.section>
-        </>
-      )}
     </div>
   );
 }

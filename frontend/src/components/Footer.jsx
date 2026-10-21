@@ -56,6 +56,14 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
+                <Link
+                  href="/fertilizers"
+                  className="hover:text-primary-accent-dark"
+                >
+                  Fertilizers
+                </Link>
+              </li>
+              <li>
                 <Link href="/add" className="hover:text-primary-accent-dark">
                   Add Equipment
                 </Link>

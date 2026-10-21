@@ -1089,12 +1089,12 @@ const mr = {
 
 const extraEn = {
   common: {
-    locationDate: "Jalgaon | March 22, 2026",
-    amravati: "Jalgaon",
+    locationDate: "Amravati | March 22, 2026",
+    amravati: "Amravati",
     sampleDate: "March 22, 2026",
   },
   footer: {
-    location: "Jalgaon, Maharashtra, India",
+    location: "Amravati, Maharashtra, India",
   },
   auth: {
     brandName: "AgriShare Farm Equipment",
@@ -1125,7 +1125,7 @@ const extraEn = {
     featuredItems: {
       tractor1: {
         title: "John Deere 6R Tractor",
-        location: "Jalgaon, Maharashtra (1.2 km)",
+        location: "Amravati, Maharashtra (1.2 km)",
       },
       harvester1: {
         title: "New Holland CR8.90 Harvester",
@@ -1192,7 +1192,7 @@ const extraEn = {
       item1Quote:
         "I got a rotavator within hours during peak season. Booking was smooth and transparent.",
       item1Name: "Mr. Bhoyar",
-      item1Role: "Farmer, Jalgaon",
+      item1Role: "Farmer, Amravati",
       item2Quote:
         "My tractor was idle for months. Now it generates monthly side income through AgriShare.",
       item2Name: "Sneha Kulkarni",
@@ -1254,7 +1254,7 @@ const extraEn = {
     address: "Address",
     addressSubtitle: "Location details for your listing",
     city: "City",
-    cityPlaceholder: "e.g. Jalgaon",
+    cityPlaceholder: "e.g. Amravati",
     cityRequired: "City is required",
     state: "State",
     statePlaceholder: "e.g. Maharashtra",
@@ -1564,11 +1564,11 @@ const extraHi = {
 
 const extraMr = {
   common: {
-    locationDate: "जळगाव | 22 मार्च, 2026",
-    amravati: "जळगाव",
+    locationDate: "अमरावती | 22 मार्च, 2026",
+    amravati: "अमरावती",
     sampleDate: "22 मार्च, 2026",
   },
-  footer: { location: "जळगाव, महाराष्ट्र, भारत" },
+  footer: { location: "अमरावती, महाराष्ट्र, भारत" },
   book: { days: "दिवस", addOns: "अॅड-ऑन", total: "एकूण" },
   dashboard: { maharashtra: "महाराष्ट्र" },
   home: {

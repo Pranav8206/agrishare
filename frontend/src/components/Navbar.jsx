@@ -16,8 +16,6 @@ import {
   LogOut,
   Trash2,
   RotateCcw,
-  Tractor,
-  Leaf,
   Sparkles,
   ShieldCheck,
 } from "lucide-react";
@@ -54,8 +52,6 @@ const Navbar = () => {
     authReady,
     logout,
     deleteAccount,
-    activeTab,
-    setActiveTab,
   } = useAppContext();
 
   useEffect(() => {
@@ -114,8 +110,8 @@ const Navbar = () => {
   const navLinks = useMemo(
     () => [
       { href: "/", label: tr("nav.home", "Home") },
-      { href: "/browse", label: tr("nav.browse", "Browse Equipment") },
-      { href: "/fertilizers", label: "🌱 Verified Fertilizers" },
+      { href: "/browse", label: "Equipment" },
+      { href: "/fertilizers", label: "Fertilizer" },
       { href: "/learn", label: tr("nav.book", "Learn") },
     ],
     [isHydrated, t],
@@ -382,43 +378,6 @@ const Navbar = () => {
               </span>
             </Link>
 
-            {/* JioHotstar / Tadka Style Mode Pill Switch */}
-            <div className="hidden sm:inline-flex items-center rounded-full bg-slate-100 p-1 border border-slate-200/80 shadow-inner">
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab("equipment");
-                  if (pathname !== "/") router.push("/");
-                }}
-                className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-black transition-all duration-200 ${
-                  activeTab === "equipment" && pathname !== "/fertilizers"
-                    ? "bg-emerald-700 text-white shadow-xs shadow-emerald-700/30"
-                    : "text-slate-600 hover:text-slate-900"
-                }`}
-              >
-                <Tractor size={13} className={activeTab === "equipment" && pathname !== "/fertilizers" ? "text-white" : "text-emerald-700"} />
-                <span>Equipment</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab("fertilizer");
-                  if (pathname !== "/" && pathname !== "/fertilizers") router.push("/fertilizers");
-                }}
-                className={`relative flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-black transition-all duration-200 ${
-                  activeTab === "fertilizer" || pathname === "/fertilizers"
-                    ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-xs shadow-teal-600/30"
-                    : "text-slate-600 hover:text-slate-900"
-                }`}
-              >
-                <Leaf size={13} className={activeTab === "fertilizer" || pathname === "/fertilizers" ? "text-lime-300" : "text-emerald-700"} />
-                <span>Fertilizers</span>
-                <span className="rounded-full bg-amber-400 text-slate-950 px-1 py-0.2 text-[8px] font-black uppercase tracking-wider">
-                  Verified
-                </span>
-              </button>
-            </div>
           </div>
 
           {/* Desktop Navigation */}
@@ -726,42 +685,6 @@ const Navbar = () => {
         {/* Mobile Menu Dropdown */}
         {isOpen && (
           <div className="md:hidden mt-4 space-y-4 rounded-2xl border border-border-light bg-surface p-4 shadow-xl backdrop-blur-sm">
-            {/* Mobile JioHotstar-like Mode Switcher */}
-            <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-xl border border-slate-200">
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab("equipment");
-                  setIsOpen(false);
-                  if (pathname !== "/") router.push("/");
-                }}
-                className={`flex items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-black transition ${
-                  activeTab === "equipment" && pathname !== "/fertilizers"
-                    ? "bg-emerald-700 text-white shadow-xs"
-                    : "text-slate-600 hover:text-slate-900"
-                }`}
-              >
-                <Tractor size={14} />
-                <span>Equipment</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab("fertilizer");
-                  setIsOpen(false);
-                  if (pathname !== "/" && pathname !== "/fertilizers") router.push("/fertilizers");
-                }}
-                className={`flex items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-black transition ${
-                  activeTab === "fertilizer" || pathname === "/fertilizers"
-                    ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-xs"
-                    : "text-slate-600 hover:text-slate-900"
-                }`}
-              >
-                <Leaf size={14} />
-                <span>Fertilizers</span>
-              </button>
-            </div>
-
             <div className="grid grid-cols-1 gap-2">
               {navLinks.map((link) => {
                 const isActive =
