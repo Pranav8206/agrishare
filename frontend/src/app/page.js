@@ -7,7 +7,6 @@ import { useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { useAppContext } from "../context/AppContext";
-import { VERIFIED_FERTILIZERS } from "../components/FertilizersSection";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -398,10 +397,11 @@ export default function AgriShareHome() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { equipments, equipmentsLoading } = useAppContext();
+  const { equipments, equipmentsLoading, axiosInstance } = useAppContext();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isListening, setIsListening] = useState(false);
+  const [featuredFertilizers, setFeaturedFertilizers] = useState([]);
   const [speechSupported] = useState(() => {
     if (typeof window === "undefined") return false;
     return Boolean(window.SpeechRecognition || window.webkitSpeechRecognition);
@@ -423,6 +423,21 @@ export default function AgriShareHome() {
     setShowProjectIntroduction(false);
     router.replace("/", { scroll: false });
   };
+
+  useEffect(() => {
+    let mounted = true;
+    axiosInstance
+      .get("/fertilizers")
+      .then(({ data }) => {
+        if (mounted) setFeaturedFertilizers(data?.fertilizers?.slice(0, 4) || []);
+      })
+      .catch(() => {
+        if (mounted) setFeaturedFertilizers([]);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [axiosInstance]);
 
   const featuredEquipment = useMemo(() => {
     const list = Array.isArray(equipments) ? equipments : [];
@@ -783,8 +798,8 @@ export default function AgriShareHome() {
           }
         />
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {VERIFIED_FERTILIZERS.slice(0, 4).map((fertilizer) => (
-            <FeaturedFertilizerCard key={fertilizer.id} fertilizer={fertilizer} />
+          {featuredFertilizers.map((fertilizer) => (
+            <FeaturedFertilizerCard key={fertilizer._id} fertilizer={fertilizer} />
           ))}
         </div>
       </motion.section>

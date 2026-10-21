@@ -48,6 +48,12 @@ const userSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    role: {
+      type: String,
+      enum: ["farmer", "admin"],
+      default: "farmer",
+      index: true,
+    },
   },
   { timestamps: true }
 );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ShieldCheck,
@@ -31,6 +31,8 @@ import {
   Info,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { useAppContext } from "@/context/AppContext";
+import Link from "next/link";
 
 // ══════════════════ MOCK VERIFIED FERTILIZERS DATA ══════════════════
 export const VERIFIED_FERTILIZERS = [
@@ -294,6 +296,9 @@ const CATEGORIES = [
 ];
 
 export default function FertilizersSection() {
+  const { axiosInstance, authReady, isAuthenticated } = useAppContext();
+  const [fertilizers, setFertilizers] = useState([]);
+  const [isLoadingFertilizers, setIsLoadingFertilizers] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCrop, setSelectedCrop] = useState("all");
@@ -305,21 +310,41 @@ export default function FertilizersSection() {
   const [farmerName, setFarmerName] = useState("");
   const [farmerPhone, setFarmerPhone] = useState("");
   const [deliveryVillage, setDeliveryVillage] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("upi");
   const [orderSuccessModal, setOrderSuccessModal] = useState(null);
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
 
+  useEffect(() => {
+    let mounted = true;
+    axiosInstance
+      .get("/fertilizers")
+      .then(({ data }) => {
+        if (mounted) setFertilizers(data?.fertilizers || []);
+      })
+      .catch((error) => {
+        if (mounted) {
+          setFertilizers([]);
+          toast.error(
+            error?.response?.data?.message || "Unable to load fertilizers.",
+          );
+        }
+      })
+      .finally(() => mounted && setIsLoadingFertilizers(false));
+    return () => {
+      mounted = false;
+    };
+  }, [axiosInstance]);
+
   // Filter logic
   const filteredFertilizers = useMemo(() => {
-    return VERIFIED_FERTILIZERS.filter((item) => {
+    return fertilizers.filter((item) => {
       const matchesCategory =
         selectedCategory === "all" || item.category === selectedCategory;
       const matchesSearch =
         !searchQuery.trim() ||
         item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.seller.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.seller.location.toLowerCase().includes(searchQuery.toLowerCase());
+        item.seller?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.seller?.location?.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCrop =
         selectedCrop === "all" ||
         item.cropTypes.some((c) =>
@@ -328,9 +353,13 @@ export default function FertilizersSection() {
 
       return matchesCategory && matchesSearch && matchesCrop;
     });
-  }, [selectedCategory, searchQuery, selectedCrop]);
+  }, [fertilizers, selectedCategory, searchQuery, selectedCrop]);
 
   const handleOpenOrder = (fert) => {
+    if (!authReady || !isAuthenticated) {
+      toast.error("Please login to order fertilizer.");
+      return;
+    }
     setSelectedFertilizerForOrder(fert);
     setOrderQuantity(1);
   };
@@ -343,30 +372,45 @@ export default function FertilizersSection() {
     }
 
     setIsSubmittingOrder(true);
-    setTimeout(() => {
-      setIsSubmittingOrder(false);
-      const generatedOrderId = `AGRI-FERT-${Math.floor(100000 + Math.random() * 900000)}`;
-      const orderDetails = {
-        orderId: generatedOrderId,
-        fertilizer: selectedFertilizerForOrder,
+    axiosInstance
+      .post("/fertilizers/orders", {
+        fertilizerId: selectedFertilizerForOrder._id,
         quantity: orderQuantity,
-        totalAmount:
-          selectedFertilizerForOrder.price * orderQuantity +
-          (selectedFertilizerForOrder.price * orderQuantity >= 1000 ? 0 : 70),
         farmerName,
         farmerPhone,
-        deliveryVillage,
-        paymentMethod,
-        date: new Date().toLocaleDateString("en-IN", {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-        }),
-      };
+        deliveryAddress: deliveryVillage,
+      })
+      .then(({ data }) => {
+        const orderDetails = {
+          orderId: data.order.orderNumber,
+          fertilizer: selectedFertilizerForOrder,
+          quantity: orderQuantity,
+          totalAmount: data.order.totalAmount,
+          farmerName,
+          farmerPhone,
+          deliveryVillage,
+          paymentMethod: "cod",
+          date: new Date(data.order.createdAt).toLocaleDateString("en-IN", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          }),
+        };
+        setFertilizers((current) =>
+          current.map((item) =>
+            item._id === selectedFertilizerForOrder._id
+              ? { ...item, quantity: item.quantity - orderQuantity }
+              : item,
+          ),
+        );
       setSelectedFertilizerForOrder(null);
       setOrderSuccessModal(orderDetails);
-      toast.success("Order Placed Successfully! SMS confirmation sent.");
-    }, 900);
+        toast.success("COD order placed successfully.");
+      })
+      .catch((error) => {
+        toast.error(error?.response?.data?.message || "Unable to place order.");
+      })
+      .finally(() => setIsSubmittingOrder(false));
   };
 
   return (
@@ -509,7 +553,11 @@ export default function FertilizersSection() {
           </div>
         </div>
 
-        {filteredFertilizers.length === 0 ? (
+        {isLoadingFertilizers ? (
+          <div className="rounded-3xl border border-slate-200 bg-white p-12 text-center text-sm font-semibold text-slate-500">
+            Loading available fertilizers...
+          </div>
+        ) : filteredFertilizers.length === 0 ? (
           <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-12 text-center">
             <Leaf className="mx-auto text-slate-400 mb-3" size={40} />
             <h3 className="text-lg font-bold text-slate-800">No verified fertilizers match your filter</h3>
@@ -529,30 +577,36 @@ export default function FertilizersSection() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {filteredFertilizers.map((fert) => (
               <motion.article
-                key={fert.id}
+                key={fert._id}
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 whileHover={{ y: -4 }}
                 transition={{ duration: 0.25 }}
                 className="group flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xs transition hover:shadow-xl hover:border-emerald-300"
               >
-                <div className="relative h-48 w-full overflow-hidden bg-slate-100">
+                <Link
+                  href={`/fertilizers/${fert._id}`}
+                  className="relative block h-48 w-full overflow-hidden bg-slate-100"
+                >
                 <img
                   src={fert.image}
                   alt={fert.name}
                   className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                </div>
+                </Link>
 
                 <div className="flex flex-1 flex-col justify-between gap-3 p-4">
                 <div className="space-y-1.5">
                   <p className="text-[11px] font-black uppercase tracking-wider text-emerald-700">
                     {fert.brand}
                     </p>
-                    <h3 className="text-base font-black text-slate-900 line-clamp-1 group-hover:text-emerald-700 transition">
+                    <Link
+                      href={`/fertilizers/${fert._id}`}
+                      className="block text-base font-black text-slate-900 line-clamp-1 group-hover:text-emerald-700 transition"
+                    >
                       {fert.name}
-                    </h3>
+                    </Link>
                   </div>
 
                   <div className="border-t border-slate-100 pt-3">
@@ -575,14 +629,16 @@ export default function FertilizersSection() {
 
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => handleOpenOrder(fert)}
+                    <Link
+                      href={`/fertilizers/${fert._id}`}
+                      aria-disabled={Number(fert.quantity ?? fert.stockAvailable) < 1}
                       className="w-full flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 py-2.5 px-4 text-xs font-black uppercase tracking-wider text-white shadow-md shadow-emerald-600/20 transition hover:bg-emerald-700 active:scale-98"
                     >
                       <ShoppingBag size={14} />
-                      Buy Verified Stock
-                    </button>
+                      {Number(fert.quantity ?? fert.stockAvailable) < 1
+                        ? "Out of Stock"
+                        : "View Product & Order"}
+                    </Link>
                   </div>
                 </div>
               </motion.article>
@@ -808,7 +864,16 @@ export default function FertilizersSection() {
                     </span>
                     <button
                       type="button"
-                      onClick={() => setOrderQuantity((prev) => Math.min(selectedFertilizerForOrder.stockAvailable, prev + 1))}
+                      onClick={() =>
+                        setOrderQuantity((prev) =>
+                          Math.min(
+                            selectedFertilizerForOrder.quantity ??
+                              selectedFertilizerForOrder.quantity ??
+                                selectedFertilizerForOrder.stockAvailable,
+                            prev + 1,
+                          ),
+                        )
+                      }
                       className="p-1 text-slate-600 hover:text-emerald-700"
                     >
                       <Plus size={14} />
@@ -849,41 +914,9 @@ export default function FertilizersSection() {
 
                 {/* Payment Option */}
                 <div className="space-y-2">
-                  <label className="font-bold text-slate-800 text-xs">Payment Method</label>
-                  <div className="grid grid-cols-3 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setPaymentMethod("upi")}
-                      className={`p-2.5 rounded-xl border text-center font-bold text-xs transition ${
-                        paymentMethod === "upi"
-                          ? "border-emerald-600 bg-emerald-50 text-emerald-800 font-black"
-                          : "border-slate-200 bg-white text-slate-600"
-                      }`}
-                    >
-                      ⚡ UPI / QR
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPaymentMethod("cod")}
-                      className={`p-2.5 rounded-xl border text-center font-bold text-xs transition ${
-                        paymentMethod === "cod"
-                          ? "border-emerald-600 bg-emerald-50 text-emerald-800 font-black"
-                          : "border-slate-200 bg-white text-slate-600"
-                      }`}
-                    >
-                      💵 Pay on Delivery
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPaymentMethod("kcc")}
-                      className={`p-2.5 rounded-xl border text-center font-bold text-xs transition ${
-                        paymentMethod === "kcc"
-                          ? "border-emerald-600 bg-emerald-50 text-emerald-800 font-black"
-                          : "border-slate-200 bg-white text-slate-600"
-                      }`}
-                    >
-                      💳 Kisan Credit
-                    </button>
+                  <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-xs font-bold text-emerald-800">
+                    💵 Cash on Delivery only. Payment is collected when the
+                    fertilizer is delivered.
                   </div>
                 </div>
 

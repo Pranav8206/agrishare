@@ -45,6 +45,9 @@ app.use("/api/v1/bookings", bookingRoutes);
 import reviewRoutes from "./routes/review.route.js";
 app.use("/api/v1/reviews", reviewRoutes);
 
+import fertilizerRoutes from "./routes/fertilizer.route.js";
+app.use("/api/v1/fertilizers", fertilizerRoutes);
+
 app.use((req, res, next) => {
   console.log("app.js 1");
 
