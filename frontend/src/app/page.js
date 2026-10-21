@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { useAppContext } from "../context/AppContext";
@@ -271,9 +272,132 @@ function TestimonialCard({ quote, name, role }) {
   );
 }
 
+const PROJECT_TEAM = [
+  ["Atharva Milind Sawalakhe", "Roll No. 23007010", "Team Leader"],
+  ["Pranav Surendra Mavle", "Roll No. 23007026", "Team Member"],
+  ["Rahul Suresh Yawle", "Roll No. 23007041", "Team Member"],
+  ["Mihir Dhirendra Jain", "Roll No. 23007028", "Team Member"],
+];
+
+function ProjectIntroduction({ onContinue }) {
+  return (
+    <motion.div
+      className="fixed inset-0 z-100 flex h-screen overflow-y-auto bg-gradient-to-br from-emerald-50 via-white to-lime-50 text-slate-900"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.35 }}
+    >
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.14),transparent_38%),radial-gradient(circle_at_bottom_left,rgba(132,204,22,0.12),transparent_34%)]" />
+      <div className="relative mx-auto flex min-h-full w-full max-w-7xl flex-col px-5 py-8 sm:px-8 lg:px-12 lg:py-10">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <img
+              src="/college-logo.webp"
+              alt="Government College of Engineering, Amravati"
+              className="h-14 w-14 rounded-2xl bg-white/95 object-contain p-1.5"
+            />
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-700">
+                Academic Major Project
+              </p>
+              <p className="mt-1 text-sm font-bold text-slate-600">2026–2027</p>
+            </div>
+          </div>
+          <span className="hidden rounded-full border border-emerald-200 bg-white/80 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-emerald-800 shadow-sm sm:inline-flex">
+            Information Technology
+          </span>
+        </div>
+
+        <div className="my-auto grid gap-10 py-12 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.1 }}
+          >
+            <p className="mb-4 text-sm font-black uppercase tracking-[0.24em] text-emerald-700">
+              Government College of Engineering, Amravati
+            </p>
+            <h1 className="max-w-4xl text-3xl font-black leading-[1.05] tracking-tight sm:text-4xl lg:text-5xl">
+              AgriShare
+              <span className="mt-3 block text-emerald-700">
+                Farm Equipment Sharing Platform
+              </span>
+            </h1>
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-700 sm:text-xl">
+              A Smart and Transparent Agricultural Equipment Rental Platform
+            </p>
+            <button
+              type="button"
+              onClick={onContinue}
+              className="mt-8 inline-flex items-center gap-3 rounded-2xl border-2 border-emerald-600 bg-emerald-600 px-7 py-4 text-sm font-black text-white shadow-xl shadow-emerald-700/25 transition hover:-translate-y-0.5 hover:bg-emerald-700 hover:shadow-2xl"
+            >
+              Explore Project
+              <ArrowRight size={17} />
+            </button>
+          </motion.div>
+
+          <motion.div
+            className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1"
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.2 }}
+          >
+            <div className="rounded-3xl border border-emerald-100 bg-white/85 p-5 shadow-lg shadow-emerald-900/5 backdrop-blur-md">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">
+                Institution
+              </p>
+              <h2 className="mt-3 text-xl font-black">
+                Government College of Engineering, Amravati
+              </h2>
+              <p className="mt-2 text-sm text-slate-600">Department of Information Technology</p>
+            </div>
+            <div className="rounded-3xl border border-emerald-100 bg-white/85 p-5 shadow-lg shadow-emerald-900/5 backdrop-blur-md">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">
+                Faculty
+              </p>
+              <div className="mt-3 grid gap-3 text-sm">
+                <p><span className="font-bold text-slate-500">Project Guide:</span> Dr. K. N. Tayade</p>
+                <p><span className="font-bold text-slate-500">HOD IT Department:</span> Dr. B. V. Wakode</p>
+                <p><span className="font-bold text-slate-500">Major Project Head:</span> Dr. P. B. Ambhore</p>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        <div className="border-t border-emerald-200 pt-6">
+          <div className="mb-4 flex items-center justify-between gap-4">
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-700">
+              Project Team
+            </p>
+            <p className="text-xs text-slate-500">
+              Information Technology Department · Team No. 15
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {PROJECT_TEAM.map(([name, rollNumber, role]) => (
+              <div
+                key={rollNumber}
+                className="rounded-2xl border border-emerald-100 bg-white/80 px-4 py-3 shadow-sm"
+              >
+                <p className="text-sm font-bold text-slate-900">{name}</p>
+                <p className="mt-1 text-xs text-slate-500">{rollNumber}</p>
+                <p className="mt-2 text-[10px] font-black uppercase tracking-[0.16em] text-emerald-700">
+                  {role}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 export default function AgriShareHome() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { equipments, equipmentsLoading } = useAppContext();
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -283,6 +407,22 @@ export default function AgriShareHome() {
     return Boolean(window.SpeechRecognition || window.webkitSpeechRecognition);
   });
   const recognitionRef = useRef(null);
+  const [showProjectIntroduction, setShowProjectIntroduction] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      (searchParams.get("projectInfo") === "1" ||
+        window.localStorage.getItem("agrishare-project-introduction-seen") !==
+          "true"),
+  );
+  const projectInfoRequested = searchParams.get("projectInfo") === "1";
+  const isProjectIntroductionVisible =
+    showProjectIntroduction || projectInfoRequested;
+
+  const continueToProject = () => {
+    window.localStorage.setItem("agrishare-project-introduction-seen", "true");
+    setShowProjectIntroduction(false);
+    router.replace("/", { scroll: false });
+  };
 
   const featuredEquipment = useMemo(() => {
     const list = Array.isArray(equipments) ? equipments : [];
@@ -440,6 +580,9 @@ export default function AgriShareHome() {
 
   return (
     <div className="min-h-screen bg-background text-slate-900">
+      {isProjectIntroductionVisible ? (
+        <ProjectIntroduction onContinue={continueToProject} />
+      ) : null}
       {/* --- HERO SECTION --- */}
           <section className="px-4 py-4">
             <div className="relative max-w-7xl mx-auto h-125 rounded-[2.5rem] overflow-hidden group">
@@ -460,6 +603,10 @@ export default function AgriShareHome() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
           >
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-white backdrop-blur">
+              <img src="/college-logo.webp" alt="" className="h-6 w-6 object-contain" />
+              Academic project · 2026–2027
+            </div>
             <h1 className="text-5xl md:text-6xl font-black text-white mb-6 tracking-tight">
               {t("home.heroTitle")}{" "}
               <span className="text-primary-accent-light">

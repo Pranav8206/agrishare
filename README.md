@@ -1,5 +1,34 @@
 # 🌾 AgriShare — Blockchain-Powered Equipment Sharing for Modern Farmers
 
+## 🎓 Academic Project Information
+
+**Project Title:** AgriShare — Blockchain-Powered Farm Equipment Sharing Platform
+
+**Subtitle:** A Smart and Transparent Agricultural Equipment Rental Platform
+
+**College:** Government College of Engineering, Amravati
+
+**Department:** Information Technology
+
+**Academic Year:** 2026–2027
+
+**Team Number:** 15
+
+### Faculty
+
+- **Project Guide:** Dr. K. N. Tayade
+- **IT Department HOD:** Dr. B. V. Wakode
+- **Major Project Head:** Dr. P. B. Ambhore
+
+### Team Members
+
+| Name | Roll No. | Role |
+| --- | --- | --- |
+| Atharva Milind Sawalakhe | 23007010 | Team Leader |
+| Pranav Surendra Mavle | 23007026 | Team Member |
+| Rahul Suresh Yawle | 23007041 | Team Member |
+| Mihir Dhirendra Jain | 23007028 | Team Member |
+
 <div align="center">
 
 ![AgriShare Banner](https://img.shields.io/badge/AgriShare-Blockchain%20%7C%20AI%20%7C%20FinTech-darkgreen?style=for-the-badge&logo=leaf&logoColor=white)

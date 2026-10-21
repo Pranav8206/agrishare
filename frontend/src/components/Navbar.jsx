@@ -409,6 +409,12 @@ const Navbar = () => {
             className="relative hidden items-center gap-3 md:flex"
             ref={dropdownRef}
           >
+            <Link
+              href="/?projectInfo=1"
+              className="rounded-full border-2 border-emerald-500 bg-emerald-50 px-4 py-2 text-xs font-black uppercase tracking-wider text-emerald-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-emerald-100 hover:shadow-md"
+            >
+              Project information
+            </Link>
             {authReady && isAuthenticated && (
               <div ref={locationDetailsRef} className="relative">
                 <div className="hidden xl:flex items-center gap-2 rounded-lg border border-border-light bg-background px-2.5 py-2 text-xs text-text-secondary">
@@ -686,6 +692,13 @@ const Navbar = () => {
         {isOpen && (
           <div className="md:hidden mt-4 space-y-4 rounded-2xl border border-border-light bg-surface p-4 shadow-xl backdrop-blur-sm">
             <div className="grid grid-cols-1 gap-2">
+              <Link
+                href="/?projectInfo=1"
+                onClick={() => setIsOpen(false)}
+                className="rounded-xl border-2 border-emerald-500 bg-emerald-50 px-3 py-2.5 text-sm font-black text-emerald-700 shadow-sm transition hover:bg-emerald-100"
+              >
+                Project information
+              </Link>
               {navLinks.map((link) => {
                 const isActive =
                   link.href === "/"

@@ -1,6 +1,7 @@
 import express from "express";
 import {
   createBooking,
+  getPricingConfiguration,
   getMyBookings,
   getOwnerBookings,
   getOwnerAnalytics,
@@ -18,6 +19,7 @@ const router = express.Router();
 
 //  CREATE
 router.post("/", protect, createBooking);
+router.get("/pricing-config", getPricingConfiguration);
 
 //  USER
 router.get("/my", protect, getMyBookings); // renter bookings

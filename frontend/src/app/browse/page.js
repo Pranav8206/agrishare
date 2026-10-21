@@ -21,7 +21,7 @@ const GENERIC_SEARCH_WORDS = new Set([
 
 const emptyFilters = () => ({
   location: "",
-  distance: 1000,
+  distance: 200,
   minPrice: "",
   maxPrice: "",
   types: new Set(),
@@ -854,7 +854,7 @@ function BrowsePageContent() {
     Boolean(appliedFilters.location.trim()) ||
     Boolean(appliedFilters.minPrice) ||
     Boolean(appliedFilters.maxPrice) ||
-    appliedFilters.distance !== 1000 ||
+    appliedFilters.distance !== 200 ||
     appliedFilters.types.size > 0 ||
     appliedFilters.manufacturers.size > 0;
 

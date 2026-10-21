@@ -3,6 +3,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { createError } from "../utils/CreateError.js";
 import { generateEquipmentAnalysis } from "../utils/gemini.js";
 import mongoose from "mongoose";
+import { getPricingConfig } from "../config/pricing.js";
 
 const currentYear = new Date().getFullYear();
 const allowedCondition = ["new", "like_new", "good", "fair", "old"];
@@ -382,7 +383,28 @@ const addEquipment = asyncHandler(async (req, res) => {
 
 //  VIEW ALL 
 const viewAllEquipments = asyncHandler(async (req, res) => {
-  const equipments = await Equipment.find()
+  const { maxEquipmentDistanceKm } = getPricingConfig();
+  const latitude = Number(req.query.latitude);
+  const longitude = Number(req.query.longitude);
+  const hasCoordinates =
+    Number.isFinite(latitude) &&
+    Number.isFinite(longitude) &&
+    isValidLatitude(latitude) &&
+    isValidLongitude(longitude);
+  const query = hasCoordinates
+    ? {
+        geoLocation: {
+          $geoWithin: {
+            $centerSphere: [
+              [longitude, latitude],
+              maxEquipmentDistanceKm / 6371,
+            ],
+          },
+        },
+      }
+    : {};
+
+  const equipments = await Equipment.find(query)
     .populate("owner", "name email")
     .sort({ createdAt: -1 });
 

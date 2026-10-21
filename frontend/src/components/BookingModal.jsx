@@ -13,7 +13,8 @@ const ADDONS = [
   { key: "insurance", label: "Insurance", icon: "🛡️", price: 120 },
 ];
 
-const DELIVERY_FEE = 350;
+const TRANSPORT_BASE_CHARGE = 500;
+const TRANSPORT_RATE_PER_KM = 10;
 
 const PAYMENT_OPTIONS = [
   {
@@ -56,9 +57,27 @@ export default function BookingModal({ equipment, isOpen, onClose, onBooked }) {
   const [activeAddons, setActiveAddons] = useState([]);
   const [paymentMode, setPaymentMode] = useState("online");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [renterCoords, setRenterCoords] = useState(null);
+  const [pricingConfig, setPricingConfig] = useState({
+    transportBaseCharge: TRANSPORT_BASE_CHARGE,
+    transportRatePerKm: TRANSPORT_RATE_PER_KM,
+  });
 
   useEffect(() => {
     if (!isOpen) return;
+
+    axiosInstance
+      .get("/bookings/pricing-config")
+      .then(({ data }) => {
+        setPricingConfig((current) => ({
+          ...current,
+          transportBaseCharge: Number(data?.transportBaseCharge) || current.transportBaseCharge,
+          transportRatePerKm: Number(data?.transportRatePerKm) || current.transportRatePerKm,
+        }));
+      })
+      .catch((error) => {
+        console.warn("Unable to load pricing configuration preview.", error);
+      });
 
     const script = document.createElement("script");
     script.src = "https://checkout.razorpay.com/v1/checkout.js";
@@ -84,6 +103,15 @@ export default function BookingModal({ equipment, isOpen, onClose, onBooked }) {
     setActiveAddons([]);
     setPaymentMode("online");
     setIsSubmitting(false);
+    setRenterCoords(null);
+    if (typeof navigator !== "undefined" && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        ({ coords }) =>
+          setRenterCoords({ latitude: coords.latitude, longitude: coords.longitude }),
+        () => setRenterCoords(null),
+        { enableHighAccuracy: false, timeout: 8000 },
+      );
+    }
   }, [isOpen, equipment?._id]);
 
   const toggleAddon = (key) => {
@@ -102,7 +130,14 @@ export default function BookingModal({ equipment, isOpen, onClose, onBooked }) {
     const addonsAmount = ADDONS.filter((addon) =>
       activeAddons.includes(addon.key),
     ).reduce((sum, addon) => sum + addon.price, 0);
-    const deliveryFee = needDelivery ? DELIVERY_FEE : 0;
+    const knownDistance = Number(equipment?.distance);
+    const transportDistance = Number.isFinite(knownDistance) ? knownDistance : null;
+    const deliveryFee = needDelivery
+      ? Math.max(
+          pricingConfig.transportBaseCharge,
+          Math.ceil((transportDistance || 0) * pricingConfig.transportRatePerKm),
+        )
+      : 0;
     const totalAmount =
       rentAmount + rentSurchargeAmount + addonsAmount + deliveryFee;
 
@@ -121,6 +156,8 @@ export default function BookingModal({ equipment, isOpen, onClose, onBooked }) {
     paymentMode,
     activeAddons,
     needDelivery,
+    equipment?.distance,
+    pricingConfig,
   ]);
 
   const verifyPayment = async (bookingId, paymentResponse) => {
@@ -209,6 +246,8 @@ export default function BookingModal({ equipment, isOpen, onClose, onBooked }) {
         addons: activeAddons,
         paymentMode,
         paymentMethod: paymentMode,
+        renterLatitude: renterCoords?.latitude,
+        renterLongitude: renterCoords?.longitude,
       };
 
       const bookingResponse = await axiosInstance.post(
@@ -321,7 +360,7 @@ export default function BookingModal({ equipment, isOpen, onClose, onBooked }) {
                 onChange={(event) => setNeedDelivery(event.target.checked)}
                 disabled={isSubmitting}
               />
-              Add delivery to my location (+Rs. 350)
+              Add delivery to my location (from ₹{pricingConfig.transportBaseCharge})
             </label>
             {needDelivery && (
               <div className="mt-3 flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2">
@@ -428,9 +467,19 @@ export default function BookingModal({ equipment, isOpen, onClose, onBooked }) {
                 <span>Rs. {pricing.addonsAmount}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span>Delivery</span>
+                <span>
+                  Transport
+                  {Number.isFinite(Number(equipment?.distance))
+                    ? ` (${Number(equipment.distance).toFixed(1)} km)`
+                    : ""}
+                </span>
                 <span>Rs. {pricing.deliveryFee}</span>
               </div>
+              {needDelivery && !renterCoords ? (
+                <p className="text-xs text-amber-700">
+                  Location access was unavailable, so the base transport charge applies.
+                </p>
+              ) : null}
               <div className="mt-2 flex items-center justify-between border-t border-gray-100 pt-2 text-base font-semibold text-gray-900">
                 <span>Total</span>
                 <span>Rs. {pricing.totalAmount}</span>

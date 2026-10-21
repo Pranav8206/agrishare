@@ -14,6 +14,10 @@ import {
   bookingIdToBytes32,
   equipmentIdToUint256,
 } from "../utils/blockchain.js";
+import {
+  calculateTransportCharge,
+  getPricingConfig,
+} from "../config/pricing.js";
 
 const BOOKING_STATUSES = ["pending", "confirmed", "cancelled", "completed"];
 
@@ -34,7 +38,6 @@ const ALLOWED_ADDONS = [
   { key: "insurance", label: "Insurance", price: 120 },
 ];
 
-const DELIVERY_FEE = 350;
 const ADVANCE_PERCENTAGE = 1; // Online now collects full amount
 const PAYMENT_MODES = ["online", "cod", "pay_later"];
 const PAYMENT_MODE_SURCHARGE_MAP = {
@@ -66,7 +69,8 @@ const calculatePricingBreakdown = (
   pricePerDay,
   selectedAddons,
   hasDelivery,
-  paymentMode = "online"
+  paymentMode = "online",
+  distanceKm = null,
 ) => {
   const baseAmount = days * pricePerDay;
   const surchargeRate = PAYMENT_MODE_SURCHARGE_MAP[paymentMode] || 0;
@@ -75,7 +79,9 @@ const calculatePricingBreakdown = (
     (sum, addon) => sum + addon.price,
     0
   );
-  const deliveryFee = hasDelivery ? DELIVERY_FEE : 0;
+  const deliveryFee = hasDelivery
+    ? calculateTransportCharge(distanceKm)
+    : 0;
   const total = baseAmount + rentSurchargeAmount + addonsAmount + deliveryFee;
   const isOnlinePayment = paymentMode === "online";
 
@@ -86,6 +92,7 @@ const calculatePricingBreakdown = (
     surchargeRate,
     rentSurchargeAmount,
     deliveryFee,
+    distanceKm: Number.isFinite(distanceKm) ? Number(distanceKm.toFixed(2)) : null,
     addonsAmount,
     totalAmount: total,
     advanceAmount: isOnlinePayment ? Math.ceil(total * ADVANCE_PERCENTAGE) : 0,
@@ -106,6 +113,8 @@ const createBooking = asyncHandler(async (req, res) => {
     specialRequirements,
     paymentMode,
     paymentMethod,
+    renterLatitude,
+    renterLongitude,
   } = req.body;
 
   if (!req.user?._id) throw createError("Not authorized", 401);
@@ -125,6 +134,9 @@ const createBooking = asyncHandler(async (req, res) => {
 
   const equipment = await Equipment.findById(equipmentId);
   if (!equipment) throw createError("Equipment not found", 404);
+  if (!equipment.isAvailable) {
+    throw createError("Equipment is currently unavailable", 409);
+  }
 
   if (equipment.owner.toString() === req.user._id.toString()) {
     throw createError("Owner cannot rent own equipment", 400);
@@ -140,6 +152,33 @@ const createBooking = asyncHandler(async (req, res) => {
 
   if (overlapping) {
     throw createError("Equipment not available for selected dates", 409);
+  }
+
+  let distanceKm = null;
+  const hasRenterCoordinates =
+    Number.isFinite(Number(renterLatitude)) &&
+    Number.isFinite(Number(renterLongitude));
+  const equipmentCoordinates = equipment.geoLocation?.coordinates;
+
+  if (hasRenterCoordinates && Array.isArray(equipmentCoordinates)) {
+    const { maxEquipmentDistanceKm } = getPricingConfig();
+    const [equipmentLongitude, equipmentLatitude] = equipmentCoordinates;
+    const toRadians = (value) => (value * Math.PI) / 180;
+    const latitudeDelta = toRadians(Number(equipmentLatitude) - Number(renterLatitude));
+    const longitudeDelta = toRadians(Number(equipmentLongitude) - Number(renterLongitude));
+    const haversine =
+      Math.sin(latitudeDelta / 2) ** 2 +
+      Math.cos(toRadians(Number(renterLatitude))) *
+        Math.cos(toRadians(Number(equipmentLatitude))) *
+        Math.sin(longitudeDelta / 2) ** 2;
+    distanceKm = 6371 * 2 * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
+
+    if (distanceKm > maxEquipmentDistanceKm) {
+      throw createError(
+        `Equipment is outside the ${maxEquipmentDistanceKm} km service radius`,
+        422,
+      );
+    }
   }
 
   // Validate and extract addon objects
@@ -159,7 +198,8 @@ const createBooking = asyncHandler(async (req, res) => {
     equipment.pricePerDay,
     selectedAddons,
     !!deliveryLocation,
-    resolvedPaymentMode
+    resolvedPaymentMode,
+    distanceKm,
   );
 
   const totalPrice = pricingBreakdown.totalAmount;
@@ -219,6 +259,10 @@ const createBooking = asyncHandler(async (req, res) => {
         : "Booking created successfully.",
     booking,
   });
+});
+
+const getPricingConfiguration = asyncHandler(async (_req, res) => {
+  res.json(getPricingConfig());
 });
 
 // ====================== MY BOOKINGS ======================
@@ -705,6 +749,7 @@ const verifyPayment = asyncHandler(async (req, res) => {
 
 export {
   createBooking,
+  getPricingConfiguration,
   getMyBookings,
   getOwnerBookings,
   getOwnerAnalytics,
@@ -720,5 +765,4 @@ export {
   PAYMENT_MODES,
   PAYMENT_MODE_SURCHARGE_MAP,
   ADVANCE_PERCENTAGE,
-  DELIVERY_FEE,
 };

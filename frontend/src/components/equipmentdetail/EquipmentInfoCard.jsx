@@ -95,6 +95,13 @@ export default function EquipmentInfoCard({
           <MapPin size={18} className="text-gray-400" />
           <span className="text-sm">Location: {locationLabel}</span>
         </div>
+        {Number.isFinite(Number(equipment?.distance)) ? (
+          <div className="flex items-center gap-2 text-gray-600">
+            <span className="ml-6 text-sm font-medium text-emerald-700">
+              {Number(equipment.distance).toFixed(1)} km from your location
+            </span>
+          </div>
+        ) : null}
 
         <div className="flex items-center gap-2 text-gray-600">
           <User size={18} className="text-gray-400" />

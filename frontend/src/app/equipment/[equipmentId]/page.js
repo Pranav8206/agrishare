@@ -173,8 +173,18 @@ export default function EquipmentDetailsPage() {
   const [similarFallbackUsed, setSimilarFallbackUsed] = useState(false);
   const [ownerEquipmentCount, setOwnerEquipmentCount] = useState(null);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const [renterCoords, setRenterCoords] = useState(null);
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (typeof navigator === "undefined" || !navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => setRenterCoords({ lat: coords.latitude, lng: coords.longitude }),
+      () => setRenterCoords(null),
+      { enableHighAccuracy: false, timeout: 8000 },
+    );
+  }, []);
 
   const specificationEntries = useMemo(() => {
     const specs = equipment?.specifications;
@@ -218,6 +228,33 @@ export default function EquipmentDetailsPage() {
     equipment?.address?.state,
     equipment?.address?.pincode,
   ]);
+
+  const equipmentDistance = useMemo(() => {
+    const coordinates = equipment?.geoLocation?.coordinates;
+    if (
+      !renterCoords ||
+      !Array.isArray(coordinates) ||
+      coordinates.length !== 2
+    ) {
+      return null;
+    }
+
+    const [longitude, latitude] = coordinates.map(Number);
+    const toRadians = (value) => (value * Math.PI) / 180;
+    const latitudeDelta = toRadians(latitude - renterCoords.lat);
+    const longitudeDelta = toRadians(longitude - renterCoords.lng);
+    const haversine =
+      Math.sin(latitudeDelta / 2) ** 2 +
+      Math.cos(toRadians(renterCoords.lat)) *
+        Math.cos(toRadians(latitude)) *
+        Math.sin(longitudeDelta / 2) ** 2;
+    return 6371 * 2 * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
+  }, [equipment?.geoLocation?.coordinates, renterCoords]);
+
+  const equipmentForBooking = useMemo(
+    () => (equipment ? { ...equipment, distance: equipmentDistance } : equipment),
+    [equipment, equipmentDistance],
+  );
 
   const normalizedDescription = useMemo(() => {
     const value = String(equipment?.description || "").trim();
@@ -1040,7 +1077,7 @@ export default function EquipmentDetailsPage() {
 
         <motion.div variants={sectionVariants}>
           <EquipmentInfoCard
-            equipment={equipment}
+            equipment={equipmentForBooking}
             ownerName={ownerName}
             ownerPhone={ownerPhone}
             ownerId={ownerIdString}
@@ -1063,7 +1100,7 @@ export default function EquipmentDetailsPage() {
       </motion.div>
 
       <BookingModal
-        equipment={equipment}
+        equipment={equipmentForBooking}
         isOpen={isBookingModalOpen}
         onClose={() => setIsBookingModalOpen(false)}
         onBooked={handleBooked}
