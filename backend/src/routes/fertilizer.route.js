@@ -17,10 +17,10 @@ const router = express.Router();
 router.get("/", listFertilizers);
 router.post("/orders", protect, createFertilizerOrder);
 router.get("/orders/my", protect, listMyFertilizerOrders);
-router.get("/:id", getFertilizer);
 router.get("/admin", protect, adminOnly, listAdminFertilizers);
 router.post("/admin", protect, adminOnly, createFertilizer);
 router.put("/admin/:id", protect, adminOnly, updateFertilizer);
 router.delete("/admin/:id", protect, adminOnly, deleteFertilizer);
+router.get("/:id", getFertilizer);
 
 export default router;

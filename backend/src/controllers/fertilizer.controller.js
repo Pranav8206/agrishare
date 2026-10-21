@@ -1,16 +1,28 @@
 import { randomUUID } from "node:crypto";
+import mongoose from "mongoose";
 import { Fertilizer } from "../models/fertilizer.model.js";
 import { FertilizerOrder } from "../models/fertilizer-order.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { createError } from "../utils/CreateError.js";
 
-const cleanProductPayload = (body = {}) => ({
-  ...body,
-  price: Number(body.price),
-  mrp: Number(body.mrp ?? body.price),
-  quantity: Number(body.quantity),
-  cropTypes: Array.isArray(body.cropTypes) ? body.cropTypes : [],
-});
+const cleanProductPayload = (body = {}, { partial = false } = {}) => {
+  const payload = { ...body };
+
+  if (body.price !== undefined) payload.price = Number(body.price);
+  if (body.mrp !== undefined) payload.mrp = Number(body.mrp);
+  else if (body.price !== undefined) payload.mrp = Number(body.price);
+  if (body.quantity !== undefined) payload.quantity = Number(body.quantity);
+  if (body.cropTypes !== undefined) {
+    payload.cropTypes = Array.isArray(body.cropTypes) ? body.cropTypes : [];
+  }
+
+  if (partial) {
+    return Object.fromEntries(
+      Object.entries(payload).filter(([, value]) => value !== undefined),
+    );
+  }
+  return payload;
+};
 
 export const listFertilizers = asyncHandler(async (_req, res) => {
   const fertilizers = await Fertilizer.find({ isActive: true })
@@ -20,6 +32,9 @@ export const listFertilizers = asyncHandler(async (_req, res) => {
 });
 
 export const getFertilizer = asyncHandler(async (req, res) => {
+  if (!mongoose.isValidObjectId(req.params.id)) {
+    throw createError("Invalid fertilizer id", 400);
+  }
   const fertilizer = await Fertilizer.findOne({
     _id: req.params.id,
     isActive: true,
@@ -45,7 +60,7 @@ export const createFertilizer = asyncHandler(async (req, res) => {
 export const updateFertilizer = asyncHandler(async (req, res) => {
   const fertilizer = await Fertilizer.findByIdAndUpdate(
     req.params.id,
-    cleanProductPayload(req.body),
+    cleanProductPayload(req.body, { partial: true }),
     { new: true, runValidators: true },
   );
   if (!fertilizer) throw createError("Fertilizer not found", 404);

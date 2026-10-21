@@ -18,6 +18,7 @@ import {
   RotateCcw,
   Sparkles,
   ShieldCheck,
+  Sprout,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -112,7 +113,6 @@ const Navbar = () => {
       { href: "/", label: tr("nav.home", "Home") },
       { href: "/browse", label: "Equipment" },
       { href: "/fertilizers", label: "Fertilizer" },
-      { href: "/learn", label: tr("nav.book", "Learn") },
     ],
     [isHydrated, t],
   );
@@ -141,6 +141,19 @@ const Navbar = () => {
       },
     ],
     [isHydrated, t],
+  );
+  const adminLinks = useMemo(
+    () =>
+      user?.role === "admin"
+        ? [
+            {
+              href: "/admin/fertilizers",
+              icon: Sprout,
+              label: "Manage Fertilizers",
+            },
+          ]
+        : [],
+    [user?.role],
   );
 
   useEffect(() => {
@@ -644,6 +657,22 @@ const Navbar = () => {
                   <Settings size={16} />
                   <span>{tr("nav.settings", "Settings")}</span>
                 </button>
+                {adminLinks.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      key={item.href}
+                      onClick={() => {
+                        setIsMenuOpen(false);
+                        router.push(item.href);
+                      }}
+                      className="flex w-full items-center gap-3 rounded-xl bg-emerald-50 px-3 py-2 text-left text-sm font-bold text-emerald-700 hover:bg-emerald-100"
+                    >
+                      <Icon size={16} />
+                      <span>{item.label}</span>
+                    </button>
+                  );
+                })}
                 <div className="my-1 border-t border-border-light" />
                 <button
                   onClick={handleLogout}
@@ -768,6 +797,26 @@ const Navbar = () => {
                     </button>
                   );
                 })}
+                {adminLinks.length > 0 ? (
+                  <div className="mt-1 border-t border-border-light pt-1">
+                    {adminLinks.map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <button
+                          key={item.href}
+                          onClick={() => {
+                            setIsOpen(false);
+                            router.push(item.href);
+                          }}
+                          className="flex w-full items-center gap-3 rounded-xl bg-emerald-50 px-3 py-2.5 text-left text-sm font-bold text-emerald-700 hover:bg-emerald-100"
+                        >
+                          <Icon size={16} />
+                          <span>{item.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : null}
               </div>
             )}
 
