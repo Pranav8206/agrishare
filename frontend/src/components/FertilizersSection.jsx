@@ -574,7 +574,7 @@ export default function FertilizersSection() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {filteredFertilizers.map((fert) => (
               <motion.article
                 key={fert._id}
