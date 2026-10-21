@@ -19,7 +19,7 @@ const fertilizerOrderSchema = new mongoose.Schema(
     paymentMethod: { type: String, enum: ["cod"], default: "cod" },
     status: {
       type: String,
-      enum: ["pending", "confirmed", "dispatched", "delivered", "cancelled"],
+      enum: ["pending", "confirmed", "dispatched", "delivered", "cancelled", "rejected"],
       default: "pending",
     },
   },

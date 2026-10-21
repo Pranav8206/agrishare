@@ -91,18 +91,11 @@ export const createFertilizerOrder = asyncHandler(async (req, res) => {
     );
   }
 
-  const fertilizer = await Fertilizer.findOneAndUpdate(
-    {
-      _id: fertilizerId,
-      isActive: true,
-      quantity: { $gte: requestedQuantity },
-    },
-    { $inc: { quantity: -requestedQuantity } },
-    { new: true },
-  );
-  if (!fertilizer) {
-    throw createError("Fertilizer is inactive or insufficient stock", 409);
-  }
+  const fertilizer = await Fertilizer.findOne({
+    _id: fertilizerId,
+    isActive: true,
+  });
+  if (!fertilizer) throw createError("Fertilizer is inactive or unavailable", 409);
 
   const deliveryCharge = fertilizer.price * requestedQuantity >= 1000 ? 0 : 70;
   const order = await FertilizerOrder.create({
@@ -145,6 +138,7 @@ export const updateFertilizerOrderStatus = asyncHandler(async (req, res) => {
     "dispatched",
     "delivered",
     "cancelled",
+    "rejected",
   ];
   if (!allowedStatuses.includes(status)) {
     throw createError("Invalid fertilizer order status", 400);
@@ -155,11 +149,20 @@ export const updateFertilizerOrderStatus = asyncHandler(async (req, res) => {
   if (order.status === "delivered" && status !== "delivered") {
     throw createError("Delivered orders cannot be changed", 409);
   }
-  if (order.status === "cancelled" && status !== "cancelled") {
+  if (["cancelled", "rejected"].includes(order.status) && status !== order.status) {
     throw createError("Cancelled orders cannot be reopened", 409);
   }
 
-  if (status === "cancelled" && order.status !== "cancelled") {
+  if (status === "confirmed" && order.status === "pending") {
+    const fertilizer = await Fertilizer.findOneAndUpdate(
+      { _id: order.fertilizer, isActive: true, quantity: { $gte: order.quantity } },
+      { $inc: { quantity: -order.quantity } },
+      { new: true },
+    );
+    if (!fertilizer) throw createError("Insufficient fertilizer stock to accept this order", 409);
+  }
+
+  if (["cancelled", "rejected"].includes(status) && ["confirmed", "dispatched"].includes(order.status)) {
     await Fertilizer.findByIdAndUpdate(order.fertilizer, {
       $inc: { quantity: order.quantity },
     });

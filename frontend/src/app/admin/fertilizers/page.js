@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   CheckCircle2,
   Edit3,
+  Eye,
   Leaf,
   Loader2,
   PackagePlus,
@@ -45,6 +46,9 @@ export default function AdminFertilizersPage() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [orderFilter, setOrderFilter] = useState("all");
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [formOpen, setFormOpen] = useState(false);
 
   const loadFertilizers = useCallback(async () => {
     setLoading(true);
@@ -106,6 +110,7 @@ export default function AdminFertilizersPage() {
       await axiosInstance[editingId ? "put" : "post"](endpoint, payload);
       toast.success(editingId ? "Fertilizer updated." : "Fertilizer added.");
       resetForm();
+      setFormOpen(false);
       await loadFertilizers();
     } catch (error) {
       toast.error(error?.response?.data?.message || "Unable to save fertilizer.");
@@ -142,7 +147,7 @@ export default function AdminFertilizersPage() {
       await axiosInstance.patch(`/fertilizers/admin/orders/${order._id}/status`, {
         status,
       });
-      toast.success(status === "confirmed" ? "Order accepted." : "Order rejected and stock restored.");
+      toast.success(status === "confirmed" ? "Order accepted and stock updated." : "Order rejected.");
       await Promise.all([loadOrders(), loadFertilizers()]);
     } catch (error) {
       toast.error(error?.response?.data?.message || "Unable to update order.");
@@ -165,6 +170,15 @@ export default function AdminFertilizersPage() {
   const activeCount = fertilizers.filter((item) => item.isActive).length;
   const totalStock = fertilizers.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
   const pendingOrders = orders.filter((order) => order.status === "pending").length;
+  const visibleOrders = orders.filter((order) =>
+    orderFilter === "all"
+      ? true
+      : orderFilter === "accepted"
+        ? ["confirmed", "dispatched", "delivered"].includes(order.status)
+        : orderFilter === "rejected"
+          ? ["rejected", "cancelled"].includes(order.status)
+          : order.status === orderFilter,
+  );
 
   return (
     <main className="min-h-screen bg-slate-50 px-4 pb-16 pt-24">
@@ -200,61 +214,59 @@ export default function AdminFertilizersPage() {
                 Review COD requests and accept or reject pending orders.
               </p>
             </div>
-            <span className="w-fit rounded-full bg-amber-100 px-3 py-1.5 text-xs font-black text-amber-700">
-              {pendingOrders} pending approval
-            </span>
+            <div className="flex flex-wrap items-center gap-2">
+              {["all", "pending", "accepted", "rejected"].map((filter) => (
+                <button key={filter} type="button" onClick={() => setOrderFilter(filter)} className={`rounded-full px-3 py-1.5 text-xs font-black capitalize ${orderFilter === filter ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}>
+                  {filter === "all" ? "All" : filter} {filter === "pending" ? `(${pendingOrders})` : ""}
+                </button>
+              ))}
+            </div>
           </div>
-          {orders.length === 0 ? (
+          {visibleOrders.length === 0 ? (
             <div className="p-10 text-center text-sm text-slate-500">No fertilizer orders received yet.</div>
           ) : (
             <div className="divide-y divide-slate-100">
-              {orders.map((order) => (
-                <div key={order._id} className="space-y-4 p-5 md:p-6">
+              {visibleOrders.map((order) => (
+                <div key={order._id} className="flex flex-col justify-between gap-4 p-5 md:flex-row md:items-center md:p-6">
                   <div className="flex flex-col justify-between gap-3 md:flex-row md:items-start">
                     <div>
                       <p className="font-black text-slate-900">{order.orderNumber}</p>
                       <p className="mt-1 text-sm font-bold text-emerald-700">
                         {order.fertilizer?.name || "Deleted fertilizer"}
                       </p>
-                      <p className="mt-1 text-xs text-slate-500">
-                        {new Date(order.createdAt).toLocaleString()} · COD
-                      </p>
+                      <p className="mt-1 text-xs text-slate-500">{order.quantity} {order.fertilizer?.unit || "units"} · {new Date(order.createdAt).toLocaleDateString()}</p>
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="text-lg font-black text-slate-900">₹{order.totalAmount}</span>
                       <span className={`rounded-full px-3 py-1 text-xs font-black capitalize ${
                         order.status === "pending"
                           ? "bg-amber-100 text-amber-700"
-                          : order.status === "cancelled"
+                          : ["cancelled", "rejected"].includes(order.status)
                             ? "bg-red-100 text-red-700"
                             : "bg-emerald-100 text-emerald-700"
                       }`}>
-                        {order.status}
+                        {["cancelled", "rejected"].includes(order.status) ? "rejected" : order.status}
                       </span>
                     </div>
                   </div>
-                  <div className="grid gap-3 rounded-2xl bg-slate-50 p-4 text-sm text-slate-600 md:grid-cols-3">
-                    <p><strong className="text-slate-800">Customer:</strong> {order.farmerName}<br />{order.farmerPhone}</p>
-                    <p><strong className="text-slate-800">Quantity:</strong> {order.quantity} {order.fertilizer?.unit || "units"}<br />₹{order.unitPrice} per unit</p>
-                    <p><strong className="text-slate-800">Delivery address:</strong><br />{order.deliveryAddress}</p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button type="button" onClick={() => setSelectedOrder(order)} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-black text-slate-700 hover:bg-slate-50"><Eye size={16} /> View order</button>
+                    {order.status === "pending" ? (
+                      <>
+                        <button type="button" onClick={() => updateOrderStatus(order, "confirmed")} className="rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-black text-white hover:bg-emerald-700">Accept</button>
+                        <button type="button" onClick={() => updateOrderStatus(order, "rejected")} className="rounded-xl border border-red-200 px-4 py-2.5 text-sm font-black text-red-700 hover:bg-red-50">Reject</button>
+                      </>
+                    ) : null}
                   </div>
-                  {order.status === "pending" ? (
-                    <div className="flex flex-wrap gap-3">
-                      <button type="button" onClick={() => updateOrderStatus(order, "confirmed")} className="rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-black text-white hover:bg-emerald-700">Accept order</button>
-                      <button type="button" onClick={() => updateOrderStatus(order, "cancelled")} className="rounded-xl border border-red-200 px-4 py-2.5 text-sm font-black text-red-700 hover:bg-red-50">Reject order</button>
-                    </div>
-                  ) : null}
                 </div>
               ))}
             </div>
           )}
         </section>
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-7">
-          <div className="mb-5 flex items-center justify-between gap-3">
-            <div><h2 className="text-xl font-black text-slate-900">{editingId ? "Edit fertilizer" : "Add fertilizer"}</h2><p className="mt-1 text-sm text-slate-500">Keep pricing and stock information accurate for farmers.</p></div>
-            {editingId ? <button type="button" onClick={resetForm} className="inline-flex items-center gap-1 text-sm font-bold text-slate-500 hover:text-slate-800"><X size={16} /> Cancel</button> : null}
-          </div>
+        {formOpen ? <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 p-4" role="dialog" aria-modal="true">
+          <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-3xl bg-white p-5 shadow-2xl md:p-7">
+          <div className="mb-5 flex items-center justify-between gap-3"><div><h2 className="text-xl font-black text-slate-900">{editingId ? "Edit fertilizer" : "Add fertilizer"}</h2><p className="mt-1 text-sm text-slate-500">Keep pricing and stock information accurate for farmers.</p></div><button type="button" onClick={() => { resetForm(); setFormOpen(false); }} className="inline-flex items-center gap-1 text-sm font-bold text-slate-500 hover:text-slate-800"><X size={16} /> Close</button></div>
           <form onSubmit={submit} className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {[
               ["name", "Product name", true],
@@ -274,24 +286,39 @@ export default function AdminFertilizersPage() {
             <label className="md:col-span-2 lg:col-span-3"><span className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-500">Description</span><textarea value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} className="min-h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:bg-white" /></label>
             <button disabled={saving} className="mt-auto inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-black text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 disabled:opacity-60">{saving ? <Loader2 size={16} className="animate-spin" /> : <PackagePlus size={16} />}{editingId ? "Save changes" : "Add fertilizer"}</button>
           </form>
-        </section>
+          </div>
+        </div>
+        : null}
 
         <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
           <div className="flex flex-col justify-between gap-4 border-b border-slate-100 p-5 md:flex-row md:items-center md:p-7">
             <div><h2 className="text-xl font-black text-slate-900">Catalog products</h2><p className="mt-1 text-sm text-slate-500">{filtered.length} products shown</p></div>
-            <div className="relative w-full md:w-72"><Search size={16} className="absolute left-3 top-3 text-slate-400" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search products..." className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-sm outline-none focus:border-emerald-500" /></div>
+            <div className="flex w-full flex-col gap-2 sm:flex-row md:w-auto"><div className="relative w-full md:w-72"><Search size={16} className="absolute left-3 top-3 text-slate-400" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search products..." className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-sm outline-none focus:border-emerald-500" /></div><button type="button" onClick={() => { resetForm(); setFormOpen(true); }} className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-black text-white hover:bg-emerald-700"><PackagePlus size={16} /> Add fertilizer</button></div>
           </div>
           {loading ? <div className="flex justify-center p-12"><Loader2 className="animate-spin text-emerald-600" /></div> : filtered.length === 0 ? <div className="p-12 text-center text-sm text-slate-500">No fertilizers found.</div> : (
             <div className="divide-y divide-slate-100">
               {filtered.map((fertilizer) => (
                 <div key={fertilizer._id} className="flex flex-col gap-4 p-5 transition hover:bg-slate-50 md:flex-row md:items-center md:justify-between md:p-6">
                   <div className="flex min-w-0 items-center gap-4"><div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-emerald-50 text-emerald-700">{fertilizer.image ? <img src={fertilizer.image} alt="" className="h-full w-full object-cover" /> : <Leaf size={22} />}</div><div className="min-w-0"><h3 className="truncate font-black text-slate-900">{fertilizer.name}</h3><p className="mt-1 text-xs text-slate-500">{fertilizer.brand} · {fertilizer.category} · {fertilizer.unit}</p></div></div>
-                  <div className="flex flex-wrap items-center gap-3 text-sm"><span className="font-black text-slate-900">₹{fertilizer.price}</span><span className="rounded-full bg-slate-100 px-3 py-1 font-bold text-slate-600">{fertilizer.quantity} units</span><span className={`rounded-full px-3 py-1 text-xs font-black ${fertilizer.isActive ? "bg-emerald-100 text-emerald-700" : "bg-slate-200 text-slate-600"}`}>{fertilizer.isActive ? "Active" : "Inactive"}</span><button title="Edit" onClick={() => { setEditingId(fertilizer._id); setForm(toForm(fertilizer)); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="rounded-lg p-2 text-slate-500 hover:bg-slate-200 hover:text-slate-900"><Edit3 size={16} /></button><button title={fertilizer.isActive ? "Deactivate" : "Activate"} onClick={() => toggleActive(fertilizer)} className="rounded-lg p-2 text-amber-600 hover:bg-amber-50"><Power size={16} /></button><button title="Delete" onClick={() => remove(fertilizer)} className="rounded-lg p-2 text-red-600 hover:bg-red-50"><Trash2 size={16} /></button></div>
+                  <div className="flex flex-wrap items-center gap-3 text-sm"><span className="font-black text-slate-900">₹{fertilizer.price}</span><span className="rounded-full bg-slate-100 px-3 py-1 font-bold text-slate-600">{fertilizer.quantity} units</span><span className={`rounded-full px-3 py-1 text-xs font-black ${fertilizer.isActive ? "bg-emerald-100 text-emerald-700" : "bg-slate-200 text-slate-600"}`}>{fertilizer.isActive ? "Active" : "Inactive"}</span><button title="Edit" onClick={() => { setEditingId(fertilizer._id); setForm(toForm(fertilizer)); setFormOpen(true); }} className="rounded-lg p-2 text-slate-500 hover:bg-slate-200 hover:text-slate-900"><Edit3 size={16} /></button><button title={fertilizer.isActive ? "Deactivate" : "Activate"} onClick={() => toggleActive(fertilizer)} className="rounded-lg p-2 text-amber-600 hover:bg-amber-50"><Power size={16} /></button><button title="Delete" onClick={() => remove(fertilizer)} className="rounded-lg p-2 text-red-600 hover:bg-red-50"><Trash2 size={16} /></button></div>
                 </div>
               ))}
             </div>
           )}
         </section>
+        {selectedOrder ? <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 p-4" role="dialog" aria-modal="true">
+          <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl">
+            <div className="flex items-start justify-between gap-4"><div><p className="text-xs font-black uppercase tracking-wider text-emerald-700">Order details</p><h2 className="mt-1 text-xl font-black text-slate-900">{selectedOrder.orderNumber}</h2></div><button type="button" onClick={() => setSelectedOrder(null)} className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"><X size={18} /></button></div>
+            <div className="mt-5 grid gap-3 rounded-2xl bg-slate-50 p-4 text-sm text-slate-600">
+              <p><strong className="text-slate-900">Product:</strong> {selectedOrder.fertilizer?.name || "Deleted fertilizer"}</p>
+              <p><strong className="text-slate-900">Customer:</strong> {selectedOrder.farmerName} · {selectedOrder.farmerPhone}</p>
+              <p><strong className="text-slate-900">Quantity:</strong> {selectedOrder.quantity} {selectedOrder.fertilizer?.unit || "units"} at ₹{selectedOrder.unitPrice} each</p>
+              <p><strong className="text-slate-900">Delivery:</strong> {selectedOrder.deliveryAddress}</p>
+              <p><strong className="text-slate-900">Payment:</strong> {selectedOrder.paymentMethod?.toUpperCase()} · <strong className="text-slate-900">Total:</strong> ₹{selectedOrder.totalAmount}</p>
+              <p><strong className="text-slate-900">Placed:</strong> {new Date(selectedOrder.createdAt).toLocaleString()}</p>
+            </div>
+          </div>
+        </div> : null}
       </div>
     </main>
   );
