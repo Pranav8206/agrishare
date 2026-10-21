@@ -1000,6 +1000,7 @@ export default function EquipmentDetailsPage() {
             )}
           </motion.section>
 
+{/* 
           <AiAnalysisPanel
             isAuthenticated={isAuthenticated}
             authReady={authReady}
@@ -1013,7 +1014,7 @@ export default function EquipmentDetailsPage() {
             localizedPriceReason={localizedPriceReason}
             localizedConditionReason={localizedConditionReason}
             formatDateTime={formatDateTime}
-          />
+          /> */}
 
           {mapData.hasValidCoords && (
             <motion.section

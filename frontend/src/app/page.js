@@ -407,19 +407,12 @@ export default function AgriShareHome() {
     return Boolean(window.SpeechRecognition || window.webkitSpeechRecognition);
   });
   const recognitionRef = useRef(null);
-  const [showProjectIntroduction, setShowProjectIntroduction] = useState(
-    () =>
-      typeof window !== "undefined" &&
-      (searchParams.get("projectInfo") === "1" ||
-        window.localStorage.getItem("agrishare-project-introduction-seen") !==
-          "true"),
-  );
+  const [showProjectIntroduction, setShowProjectIntroduction] = useState(true);
   const projectInfoRequested = searchParams.get("projectInfo") === "1";
   const isProjectIntroductionVisible =
     showProjectIntroduction || projectInfoRequested;
 
   const continueToProject = () => {
-    window.localStorage.setItem("agrishare-project-introduction-seen", "true");
     setShowProjectIntroduction(false);
     router.replace("/", { scroll: false });
   };
