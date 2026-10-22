@@ -303,7 +303,7 @@ function ProjectIntroduction({ onContinue }) {
               <p className="mt-1 text-sm font-bold text-slate-600">2026–2027</p>
             </div>
           </div>
-          <span className="hidden rounded-full border border-emerald-200 bg-white/80 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-emerald-800 shadow-sm sm:inline-flex">
+          <span className="hidden rounded-full border border-emerald-200 bg-white/80 px-5 py-3 text-md font-bold uppercase tracking-[0.16em] text-emerald-800 shadow-sm sm:inline-flex">
             Information Technology
           </span>
         </div>
@@ -346,10 +346,12 @@ function ProjectIntroduction({ onContinue }) {
               <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">
                 Institution
               </p>
-              <h2 className="mt-3 text-xl font-black">
+              <h2 className="mt-3 text-2xl font-black leading-tight sm:text-3xl">
                 Government College of Engineering, Amravati
               </h2>
-              <p className="mt-2 text-sm text-slate-600">Department of Information Technology</p>
+              <p className="mt-3 text-base font-semibold text-slate-600 sm:text-lg">
+                Department of Information Technology
+              </p>
             </div>
             <div className="rounded-3xl border border-emerald-100 bg-white/85 p-5 shadow-lg shadow-emerald-900/5 backdrop-blur-md">
               <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700">
