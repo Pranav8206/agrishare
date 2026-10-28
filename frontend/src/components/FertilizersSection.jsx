@@ -376,10 +376,11 @@ export default function FertilizersSection() {
     setIsSellerRegistrationOpen(true);
   };
 
-  const sellerEmailHref = `mailto:pranavmawle8206@gmail.com?subject=${encodeURIComponent(
-    `Verified Seller Registration - ${sellerEmail || "Applicant"}`,
-  )}&body=${encodeURIComponent(
-    `Hello AgriShare team,
+  const sellerEmailHref = `https://mail.google.com/mail/?view=cm&fs=1&${new URLSearchParams(
+    {
+      to: "pranavmawle8206@gmail.com",
+      su: `Verified Seller Registration - ${sellerEmail || "Applicant"}`,
+      body: `Hello AgriShare team,
 
 I would like to register as a verified seller.
 
@@ -391,7 +392,8 @@ I have attached my license and photos of my products for verification.
 
 Regards,
 ${sellerEmail || "[Your email address]"}`,
-  )}`;
+    },
+  ).toString()}`;
 
   const handlePlaceOrder = (e) => {
     e.preventDefault();
@@ -813,6 +815,8 @@ ${sellerEmail || "[Your email address]"}`,
                 </button>
                 <a
                   href={sellerEmailHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   onClick={() => setIsSellerRegistrationOpen(false)}
                   className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-700 py-2.5 text-xs font-bold text-white hover:bg-emerald-800"
                 >
