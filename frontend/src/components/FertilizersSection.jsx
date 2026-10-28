@@ -25,6 +25,7 @@ import {
   QrCode,
   Building2,
   Phone,
+  Mail,
   HelpCircle,
   Clock,
   ChevronRight,
@@ -296,7 +297,7 @@ const CATEGORIES = [
 ];
 
 export default function FertilizersSection() {
-  const { axiosInstance, authReady, isAuthenticated } = useAppContext();
+  const { axiosInstance, authReady, isAuthenticated, user } = useAppContext();
   const [fertilizers, setFertilizers] = useState([]);
   const [isLoadingFertilizers, setIsLoadingFertilizers] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -304,6 +305,10 @@ export default function FertilizersSection() {
   const [selectedCrop, setSelectedCrop] = useState("all");
   const [selectedFertilizerForCert, setSelectedFertilizerForCert] = useState(null);
   const [selectedFertilizerForOrder, setSelectedFertilizerForOrder] = useState(null);
+  const [isSellerRegistrationOpen, setIsSellerRegistrationOpen] = useState(false);
+  const [sellerUsername, setSellerUsername] = useState("");
+  const [sellerReason, setSellerReason] = useState("");
+  const [sellerExperience, setSellerExperience] = useState("");
 
   // Order modal state
   const [orderQuantity, setOrderQuantity] = useState(1);
@@ -363,6 +368,30 @@ export default function FertilizersSection() {
     setSelectedFertilizerForOrder(fert);
     setOrderQuantity(1);
   };
+
+  const handleOpenSellerRegistration = () => {
+    setSellerUsername(user?.username || user?.name || "");
+    setSellerReason("");
+    setSellerExperience("");
+    setIsSellerRegistrationOpen(true);
+  };
+
+  const sellerEmailHref = `mailto:pranavmawle8206@gmail.com?subject=${encodeURIComponent(
+    `Verified Seller Registration - ${sellerUsername || "Applicant"}`,
+  )}&body=${encodeURIComponent(
+    `Hello AgriShare team,
+
+I would like to register as a verified seller.
+
+Username: ${sellerUsername || "[Enter your username]"}
+Reason for applying: ${sellerReason || "[Enter your reason]"}
+Experience: ${sellerExperience || "[Enter your experience]"}
+
+I have attached my license and photos of my products for verification.
+
+Regards,
+${sellerUsername || "[Your name]"}`,
+  )}`;
 
   const handlePlaceOrder = (e) => {
     e.preventDefault();
@@ -682,7 +711,7 @@ export default function FertilizersSection() {
               List your tested fertilizer stocks and reach 10,000+ local farmers.
             </p>
             <button
-              onClick={() => toast.success("Seller Registration Portal: Upload FCO License & Lab Certificate to get verified.")}
+              onClick={handleOpenSellerRegistration}
               className="w-full rounded-xl bg-slate-900 py-2.5 text-xs font-bold text-white hover:bg-slate-800"
             >
               Register as Verified Seller
@@ -690,6 +719,113 @@ export default function FertilizersSection() {
           </div>
         </div>
       </div>
+
+      {/* ══════════════════ MODAL 3: VERIFIED SELLER REGISTRATION ══════════════════ */}
+      <AnimatePresence>
+        {isSellerRegistrationOpen && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) {
+                setIsSellerRegistrationOpen(false);
+              }
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="seller-registration-title"
+            >
+              <button
+                type="button"
+                onClick={() => setIsSellerRegistrationOpen(false)}
+                className="absolute right-4 top-4 rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                aria-label="Close seller registration"
+              >
+                <X size={20} />
+              </button>
+
+              <div className="mb-5 pr-8">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-emerald-800">
+                  <ShieldCheck size={13} /> Seller verification
+                </span>
+                <h3 id="seller-registration-title" className="mt-2 text-xl font-black text-slate-900">
+                  Become a Verified Seller
+                </h3>
+                <p className="mt-1 text-xs leading-relaxed text-slate-500">
+                  Share your details and supporting documents with our team. We will review your application and contact you after verification.
+                </p>
+              </div>
+
+              <div className="mb-5 space-y-3 rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4 text-xs text-emerald-950">
+                <p className="font-bold">How to get verified</p>
+                <ol className="list-inside list-decimal space-y-1.5 text-emerald-900/80">
+                  <li>Enter your username, reason for applying, and experience.</li>
+                  <li>Click the email button below to open a prefilled email.</li>
+                  <li>Attach your valid license and clear photos of your products before sending.</li>
+                </ol>
+              </div>
+
+              <div className="space-y-4">
+                <label className="block text-xs font-bold text-slate-700">
+                  Username
+                  <input
+                    type="text"
+                    value={sellerUsername}
+                    onChange={(event) => setSellerUsername(event.target.value)}
+                    placeholder="Your AgriShare username"
+                    className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5 font-normal text-slate-800 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                  />
+                </label>
+                <label className="block text-xs font-bold text-slate-700">
+                  Reason for applying
+                  <textarea
+                    value={sellerReason}
+                    onChange={(event) => setSellerReason(event.target.value)}
+                    placeholder="Why would you like to become a verified seller?"
+                    rows={3}
+                    className="mt-1.5 w-full resize-none rounded-xl border border-slate-200 px-3 py-2.5 font-normal text-slate-800 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                  />
+                </label>
+                <label className="block text-xs font-bold text-slate-700">
+                  Your experience
+                  <textarea
+                    value={sellerExperience}
+                    onChange={(event) => setSellerExperience(event.target.value)}
+                    placeholder="Tell us about your farming, manufacturing, or selling experience"
+                    rows={3}
+                    className="mt-1.5 w-full resize-none rounded-xl border border-slate-200 px-3 py-2.5 font-normal text-slate-800 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                  />
+                </label>
+              </div>
+
+              <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={() => setIsSellerRegistrationOpen(false)}
+                  className="w-full rounded-xl border border-slate-200 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+                <a
+                  href={sellerEmailHref}
+                  onClick={() => setIsSellerRegistrationOpen(false)}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-700 py-2.5 text-xs font-bold text-white hover:bg-emerald-800"
+                >
+                  <Mail size={15} /> Email Verification Request
+                </a>
+              </div>
+              <p className="mt-3 text-center text-[11px] text-slate-400">
+                Send to pranavmawle8206@gmail.com and remember to attach your documents.
+              </p>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* ══════════════════ MODAL 1: LAB TEST CERTIFICATE MODAL ══════════════════ */}
       <AnimatePresence>
