@@ -306,7 +306,7 @@ export default function FertilizersSection() {
   const [selectedFertilizerForCert, setSelectedFertilizerForCert] = useState(null);
   const [selectedFertilizerForOrder, setSelectedFertilizerForOrder] = useState(null);
   const [isSellerRegistrationOpen, setIsSellerRegistrationOpen] = useState(false);
-  const [sellerUsername, setSellerUsername] = useState("");
+  const [sellerEmail, setSellerEmail] = useState("");
   const [sellerReason, setSellerReason] = useState("");
   const [sellerExperience, setSellerExperience] = useState("");
 
@@ -370,27 +370,27 @@ export default function FertilizersSection() {
   };
 
   const handleOpenSellerRegistration = () => {
-    setSellerUsername(user?.username || user?.name || "");
+    setSellerEmail(user?.email || "");
     setSellerReason("");
     setSellerExperience("");
     setIsSellerRegistrationOpen(true);
   };
 
   const sellerEmailHref = `mailto:pranavmawle8206@gmail.com?subject=${encodeURIComponent(
-    `Verified Seller Registration - ${sellerUsername || "Applicant"}`,
+    `Verified Seller Registration - ${sellerEmail || "Applicant"}`,
   )}&body=${encodeURIComponent(
     `Hello AgriShare team,
 
 I would like to register as a verified seller.
 
-Username: ${sellerUsername || "[Enter your username]"}
+Email address: ${sellerEmail || "[Enter your email address]"}
 Reason for applying: ${sellerReason || "[Enter your reason]"}
 Experience: ${sellerExperience || "[Enter your experience]"}
 
 I have attached my license and photos of my products for verification.
 
 Regards,
-${sellerUsername || "[Your name]"}`,
+${sellerEmail || "[Your email address]"}`,
   )}`;
 
   const handlePlaceOrder = (e) => {
@@ -764,7 +764,7 @@ ${sellerUsername || "[Your name]"}`,
               <div className="mb-5 space-y-3 rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4 text-xs text-emerald-950">
                 <p className="font-bold">How to get verified</p>
                 <ol className="list-inside list-decimal space-y-1.5 text-emerald-900/80">
-                  <li>Enter your username, reason for applying, and experience.</li>
+                  <li>Enter your email address, reason for applying, and experience.</li>
                   <li>Click the email button below to open a prefilled email.</li>
                   <li>Attach your valid license and clear photos of your products before sending.</li>
                 </ol>
@@ -772,12 +772,12 @@ ${sellerUsername || "[Your name]"}`,
 
               <div className="space-y-4">
                 <label className="block text-xs font-bold text-slate-700">
-                  Username
+                  Email address
                   <input
-                    type="text"
-                    value={sellerUsername}
-                    onChange={(event) => setSellerUsername(event.target.value)}
-                    placeholder="Your AgriShare username"
+                    type="email"
+                    value={sellerEmail}
+                    onChange={(event) => setSellerEmail(event.target.value)}
+                    placeholder="Your email address"
                     className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5 font-normal text-slate-800 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
                   />
                 </label>
